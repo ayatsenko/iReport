@@ -368,21 +368,19 @@
 					</textElement>
 					<text><![CDATA[]]></text>
 				</staticText>
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#9999FF" uuid="c29c6338-5b42-437d-8ceb-14b44a754fd3">
-						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
-					</reportElement>
-					<box leftPadding="4">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#9999FF" uuid="f8d0c1a7-cd30-446c-a4f8-6db3a87bcd8f"/>
+					<box>
 						<topPen lineWidth="1.5"/>
 						<leftPen lineWidth="1.5"/>
 						<bottomPen lineWidth="1.5"/>
 						<rightPen lineWidth="1.5"/>
 					</box>
-					<textElement verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle" markup="none">
 						<font fontName="Tahoma" size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{PARAM_ID}]]></textFieldExpression>
-				</textField>
+					<text><![CDATA[]]></text>
+				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
@@ -636,21 +634,19 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$V{Param_REZ_D2EQ}]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#9999FF" uuid="e8e8c4b9-8e30-4410-9e9f-9f2892a7c429">
-						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
-					</reportElement>
-					<box leftPadding="4">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#9999FF" uuid="e071d522-eb51-4040-bcd3-0042f43b2b6a"/>
+					<box>
 						<topPen lineWidth="1.5"/>
 						<leftPen lineWidth="1.5"/>
 						<bottomPen lineWidth="1.5"/>
 						<rightPen lineWidth="1.5"/>
 					</box>
-					<textElement verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle" markup="none">
 						<font fontName="Tahoma" size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{PARAM_ID}]]></textFieldExpression>
-				</textField>
+					<text><![CDATA[]]></text>
+				</staticText>
 			</band>
 		</groupFooter>
 	</group>
@@ -920,21 +916,19 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$F{RC_NAME}]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00CCFF" uuid="064388a5-0b51-4fd3-8b2b-196172db45f2">
-						<property name="net.sf.jasperreports.export.xls.row.outline.level.2" value="Body"/>
-					</reportElement>
-					<box leftPadding="4">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00CCFF" uuid="8b2ec7e4-b92d-46c4-b1bc-7c4400e4e033"/>
+					<box>
 						<topPen lineWidth="1.5"/>
 						<leftPen lineWidth="1.5"/>
 						<bottomPen lineWidth="1.5"/>
 						<rightPen lineWidth="1.5"/>
 					</box>
-					<textElement verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle" markup="none">
 						<font fontName="Tahoma" size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{PARAM_ID}]]></textFieldExpression>
-				</textField>
+					<text><![CDATA[]]></text>
+				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
@@ -1188,21 +1182,19 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$V{RC_REZ_D2EQ}]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00CCFF" uuid="7eeb91b8-9a5c-47e4-b8c7-8de6686509fe">
-						<property name="net.sf.jasperreports.export.xls.row.outline.level.2" value="End"/>
-					</reportElement>
-					<box leftPadding="4">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00CCFF" uuid="1b881795-20dd-4b11-90b5-d90f22d36089"/>
+					<box>
 						<topPen lineWidth="1.5"/>
 						<leftPen lineWidth="1.5"/>
 						<bottomPen lineWidth="1.5"/>
 						<rightPen lineWidth="1.5"/>
 					</box>
-					<textElement verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle" markup="none">
 						<font fontName="Tahoma" size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{PARAM_ID}]]></textFieldExpression>
-				</textField>
+					<text><![CDATA[]]></text>
+				</staticText>
 			</band>
 		</groupFooter>
 	</group>
@@ -1457,19 +1449,19 @@
 					</textElement>
 					<text><![CDATA[Сума:]]></text>
 				</staticText>
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00FFFF" uuid="1ae8a8d6-b0f8-4598-aec1-f079cd6e2d7d"/>
-					<box leftPadding="4">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="50" height="13" backcolor="#00FFFF" uuid="eeb3dfb8-d683-427e-9680-13ef6fb85b87"/>
+					<box>
 						<topPen lineWidth="1.5"/>
 						<leftPen lineWidth="1.5"/>
 						<bottomPen lineWidth="1.5"/>
 						<rightPen lineWidth="1.5"/>
 					</box>
-					<textElement verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle" markup="none">
 						<font fontName="Tahoma" size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{PARAM_ID}]]></textFieldExpression>
-				</textField>
+					<text><![CDATA[]]></text>
+				</staticText>
 			</band>
 		</groupFooter>
 	</group>
