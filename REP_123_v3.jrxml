@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" pageWidth="700" pageHeight="595" orientation="Landscape" columnWidth="700" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="8af29180-dd1c-4e97-b578-10bafe7f6a88">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<parameter name="start_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Початкова дата]]></parameterDescription>
+	</parameter>
+	<parameter name="end_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Кінцева дата]]></parameterDescription>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call FDI_BANK.FDIPKG_REPORTS.REPORT_123($P{start_date},$P{end_date},$P{ORACLE_REF_CURSOR})}]]>
+	</queryString>
+	<field name="REGIONALCODE" class="java.lang.String"/>
+	<field name="TOBOID" class="java.lang.String"/>
+	<field name="ACCOUNTANO" class="java.lang.String"/>
+	<field name="ACCOUNTBNO" class="java.lang.String"/>
+	<field name="CURRENCYID" class="java.lang.String"/>
+	<field name="D020VALUE" class="java.lang.Integer"/>
+	<field name="SUMMA" class="java.math.BigDecimal"/>
+	<field name="SUMMAEQ" class="java.math.BigDecimal"/>
+	<field name="SNAME" class="java.lang.String"/>
+	<variable name="PRIH_RASH" class="java.lang.String">
+		<variableExpression><![CDATA[($F{D020VALUE} <= 299 ? "Приход" : "Расход")]]></variableExpression>
+	</variable>
+	<variable name="SUMD020" class="java.math.BigDecimal" resetType="Group" resetGroup="SYMBOL" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMMA}]]></variableExpression>
+	</variable>
+	<variable name="SUMD020EQ" class="java.math.BigDecimal" resetType="Group" resetGroup="SYMBOL" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMMAEQ}]]></variableExpression>
+	</variable>
+	<variable name="SUM_REG_EQ" class="java.math.BigDecimal" resetType="Group" resetGroup="Region" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMMAEQ}]]></variableExpression>
+	</variable>
+	<group name="Region">
+		<groupExpression><![CDATA[$F{REGIONALCODE}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="700" height="20" forecolor="#000000" backcolor="#FFCCCC" uuid="fda3a4ef-977f-46e9-9792-bf455c31e843"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{SNAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="21">
+				<textField pattern="###0.00;-###0.00">
+					<reportElement x="600" y="0" width="100" height="21" uuid="02875387-f269-4f10-8b57-86d1743e35b1"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{SUM_REG_EQ}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="600" height="21" forecolor="#000000" backcolor="#FFCCCC" uuid="2f276253-d6c6-40cc-bdfb-0fb93e4533a0">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Всього по регіону " + $F{SNAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Currency">
+		<groupExpression><![CDATA[$F{CURRENCYID}]]></groupExpression>
+		<groupHeader>
+			<band height="19">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="700" height="19" forecolor="#000000" backcolor="#66FF66" uuid="2d617709-b51f-4e5d-8242-61aeeda8160e">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["       По валюті "+ $F{CURRENCYID}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="SYMBOL">
+		<groupExpression><![CDATA[$F{D020VALUE}]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField pattern="###0.00;-###0.00">
+					<reportElement x="500" y="0" width="100" height="20" uuid="2106f853-ff3f-4cd0-89f0-93142f3510a0"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{SUMD020}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.00;-###0.00">
+					<reportElement x="600" y="0" width="100" height="20" uuid="caf9510d-a1bb-4f22-9ad3-e58fc8bd2ce2"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{SUMD020EQ}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="500" height="20" forecolor="#000000" backcolor="#CCCCFF" uuid="a4720805-235b-47b5-af0d-e8cd7ba3880d"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["                             Всього по символу "+ $F{D020VALUE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="45" width="500" height="34" backcolor="#FFFF33" uuid="55ba2074-f3a9-4e6a-b102-c269e789d3a9"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="500" y="45" width="100" height="34" backcolor="#FFFF33" uuid="f9a5adb4-876c-491a-a9ea-c1ee8858fc60"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума в валюті]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="600" y="45" width="100" height="34" backcolor="#FFFF33" uuid="c8d50091-dfff-495a-bb93-3ca632c98426"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="700" height="45" backcolor="#66CCFF" uuid="a47cb9eb-1e4e-4c04-9db8-aa9de09cff9d"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA["Розшифровка 73 файла за період з "+ (new SimpleDateFormat("dd.MM.yyyy").format($P{start_date}))+" по " +(new SimpleDateFormat("dd.MM.yyyy").format($P{end_date}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+</jasperReport>

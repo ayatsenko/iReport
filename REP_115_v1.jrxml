@@ -1,0 +1,3230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Sverka_Dep" language="groovy" pageWidth="5570" pageHeight="595" orientation="Landscape" columnWidth="5570" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="fa03566f-e2c4-4648-82fa-b45316aaff7d">
+	<property name="ireport.zoom" value="0.9330147604194793"/>
+	<property name="ireport.x" value="4172"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="5"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.column" value="E"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<parameter name="Plan_Year" class="java.lang.String">
+		<parameterDescription><![CDATA[Плановий Рік]]></parameterDescription>
+		<defaultValueExpression><![CDATA[(new SimpleDateFormat("yyyy")).format(new Date())]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+PLANYEAR,
+BRANCH_ID,
+BRANCH_NAME,
+RC_ID,
+RC_NAME,
+PARAM_ID,
+PARAM_NAME,
+JANUARY_PLAN,
+JANUARY_FACT,
+FEBRUARY_PLAN,
+FEBRUARY_FACT,
+MARCH_PLAN,
+MARCH_FACT,
+APRIL_PLAN,
+APRIL_FACT,
+MAY_PLAN,
+MAY_FACT,
+JUNE_PLAN,
+JUNE_FACT,
+JULY_PLAN,
+JULY_FACT,
+AUGUST_PLAN,
+AUGUST_FACT,
+SEPTEMBER_PLAN,
+SEPTEMBER_FACT,
+OCTOBER_PLAN,
+OCTOBER_FACT,
+NOVEMBER_PLAN,
+NOVEMBER_FACT,
+DECEMBER_PLAN,
+DECEMBER_FACT,
+YEAR_SUMM_PLAN,
+YEAR_SUMM_FACT
+FROM FDI_BANK.VPARAM_VALLFORM
+where PLANYEAR = $P{Plan_Year}
+and PARAM_ID = 4
+order by RC_ID, BRANCH_ID]]>
+	</queryString>
+	<field name="PLANYEAR" class="java.lang.String"/>
+	<field name="BRANCH_ID" class="java.math.BigDecimal"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="RC_ID" class="java.math.BigDecimal"/>
+	<field name="RC_NAME" class="java.lang.String"/>
+	<field name="PARAM_ID" class="java.math.BigDecimal"/>
+	<field name="PARAM_NAME" class="java.lang.String"/>
+	<field name="JANUARY_PLAN" class="java.math.BigDecimal"/>
+	<field name="JANUARY_FACT" class="java.math.BigDecimal"/>
+	<field name="FEBRUARY_PLAN" class="java.math.BigDecimal"/>
+	<field name="FEBRUARY_FACT" class="java.math.BigDecimal"/>
+	<field name="MARCH_PLAN" class="java.math.BigDecimal"/>
+	<field name="MARCH_FACT" class="java.math.BigDecimal"/>
+	<field name="APRIL_PLAN" class="java.math.BigDecimal"/>
+	<field name="APRIL_FACT" class="java.math.BigDecimal"/>
+	<field name="MAY_PLAN" class="java.math.BigDecimal"/>
+	<field name="MAY_FACT" class="java.math.BigDecimal"/>
+	<field name="JUNE_PLAN" class="java.math.BigDecimal"/>
+	<field name="JUNE_FACT" class="java.math.BigDecimal"/>
+	<field name="JULY_PLAN" class="java.math.BigDecimal"/>
+	<field name="JULY_FACT" class="java.math.BigDecimal"/>
+	<field name="AUGUST_PLAN" class="java.math.BigDecimal"/>
+	<field name="AUGUST_FACT" class="java.math.BigDecimal"/>
+	<field name="SEPTEMBER_PLAN" class="java.math.BigDecimal"/>
+	<field name="SEPTEMBER_FACT" class="java.math.BigDecimal"/>
+	<field name="OCTOBER_PLAN" class="java.math.BigDecimal"/>
+	<field name="OCTOBER_FACT" class="java.math.BigDecimal"/>
+	<field name="NOVEMBER_PLAN" class="java.math.BigDecimal"/>
+	<field name="NOVEMBER_FACT" class="java.math.BigDecimal"/>
+	<field name="DECEMBER_PLAN" class="java.math.BigDecimal"/>
+	<field name="DECEMBER_FACT" class="java.math.BigDecimal"/>
+	<field name="YEAR_SUMM_PLAN" class="java.math.BigDecimal"/>
+	<field name="YEAR_SUMM_FACT" class="java.math.BigDecimal"/>
+	<variable name="RC_JANUARY_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_JANUARY_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_JANUARY_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_JANUARY_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_FEBRUARY_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEBRUARY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_FEBRUARY_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEBRUARY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_FEBRUARY_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEBRUARY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_FEBRUARY_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEBRUARY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_MARCH_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{MARCH_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_MARCH_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{MARCH_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_MARCH_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MARCH_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_MARCH_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MARCH_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_APRIL_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_APRIL_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_APRIL_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_APRIL_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_MAY_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{MAY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_MAY_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{MAY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_MAY_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MAY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_MAY_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MAY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_JUNE_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JUNE_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_JUNE_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JUNE_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_JUNE_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JUNE_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_JUNE_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JUNE_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_JULY_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_JULY_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_JULY_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_JULY_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_AUGUST_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{AUGUST_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_AUGUST_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{AUGUST_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_AUGUST_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{AUGUST_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_AUGUST_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{AUGUST_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_SEPTEMBER_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEPTEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_SEPTEMBER_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEPTEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_SEPTEMBER_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEPTEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_SEPTEMBER_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEPTEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_OCTOBER_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_OCTOBER_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_OCTOBER_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_OCTOBER_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_NOVEMBER_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{NOVEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_NOVEMBER_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{NOVEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_NOVEMBER_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{NOVEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_NOVEMBER_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{NOVEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_DECEMBER_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{DECEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_DECEMBER_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{DECEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_DECEMBER_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DECEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_DECEMBER_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DECEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter1_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_PLAN}+$F{FEBRUARY_PLAN}+$F{MARCH_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter1_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_FACT}+$F{FEBRUARY_FACT}+$F{MARCH_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter1_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_PLAN}+$F{FEBRUARY_PLAN}+$F{MARCH_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter1_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JANUARY_FACT}+$F{FEBRUARY_FACT}+$F{MARCH_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter2_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_PLAN}+$F{MAY_PLAN}+$F{JUNE_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter2_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_FACT}+$F{MAY_FACT}+$F{JUNE_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter2_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_PLAN}+$F{MAY_PLAN}+$F{JUNE_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter2_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{APRIL_FACT}+$F{MAY_FACT}+$F{JUNE_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter3_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_PLAN}+$F{AUGUST_PLAN}+$F{SEPTEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter3_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_FACT}+$F{AUGUST_FACT}+$F{SEPTEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter3_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_PLAN}+$F{AUGUST_PLAN}+$F{SEPTEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter3_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{JULY_FACT}+$F{AUGUST_FACT}+$F{SEPTEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter4_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_PLAN}+$F{NOVEMBER_PLAN}+$F{DECEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_quarter4_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_FACT}+$F{NOVEMBER_FACT}+$F{DECEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter4_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_PLAN}+$F{NOVEMBER_PLAN}+$F{DECEMBER_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_quarter4_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OCTOBER_FACT}+$F{NOVEMBER_FACT}+$F{DECEMBER_FACT}]]></variableExpression>
+	</variable>
+	<variable name="RC_YEAR_SUMM_Plan" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{YEAR_SUMM_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="RC_YEAR_SUMM_Fact" class="java.math.BigDecimal" resetType="Group" resetGroup="RegUpr" calculation="Sum">
+		<variableExpression><![CDATA[$F{YEAR_SUMM_FACT}]]></variableExpression>
+	</variable>
+	<variable name="All_YEAR_SUMM_Plan" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{YEAR_SUMM_PLAN}]]></variableExpression>
+	</variable>
+	<variable name="All_YEAR_SUMM_Fact" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{YEAR_SUMM_FACT}]]></variableExpression>
+	</variable>
+	<group name="RegUpr">
+		<groupExpression><![CDATA[$F{RC_ID}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="5570" height="20" forecolor="#FFFFFF" backcolor="#CCCCCC" uuid="d4746dd7-7f29-4fe0-822b-dd19fedf8af9">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
+					</reportElement>
+					<box leftPadding="10">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Управління - '+ ($F{RC_NAME}) +':']]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="470" height="20" forecolor="#FFFFFF" backcolor="#CCCCCC" uuid="061e22aa-6a2c-4306-81a6-faefcd61a9df">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
+					</reportElement>
+					<box leftPadding="10">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Сума по управлінню - '+ ($F{RC_NAME}) +':']]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="f9b5607b-6eca-4368-b8b0-413daedb55b7"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JANUARY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="670" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="fd6d11b3-64b3-4b59-8cf4-057d78a53de0"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JANUARY_Fact}-$V{RC_JANUARY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="570" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="c8fe165c-8533-48c0-ba5c-6835884d8063"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JANUARY_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="870" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="8106de7a-b07e-47a8-ae72-729973386153"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_FEBRUARY_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="770" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="037ad3fc-7af0-41c8-90a4-40ac654f9d40"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_FEBRUARY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="970" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="948f5b5f-9f32-459e-9454-1d4d729a5d97"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_FEBRUARY_Fact}-$V{RC_FEBRUARY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1070" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="f314a526-53a8-444c-b710-6ded1f656626"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MARCH_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1270" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="9cbad3ce-7f62-4639-8387-d62eb83958e7"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MARCH_Fact}-$V{RC_MARCH_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1170" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="092c6efb-8f12-43d3-974b-92df44a62c54"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MARCH_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="391ebe6f-bfb4-41d4-9d8e-9127c8d633b6"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_APRIL_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1370" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="592a12e1-1989-44f6-864d-bdc69eeab62f"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_APRIL_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1570" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="e4eb12dc-fa85-49d6-aaae-ef091ae4b704"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_APRIL_Fact}-$V{RC_APRIL_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1670" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="0886f076-9bae-4e5a-a689-6bf980d2a7dd"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MAY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1770" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="731dc8fc-c472-4945-88fa-0ebcdf43d655"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MAY_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1870" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="a7197655-00d5-4396-a2e6-5a8c9ca01107"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_MAY_Fact}-$V{RC_MAY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1970" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="36be42f9-dd57-4722-ac5b-af57d7e31a9f"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JUNE_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2070" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="bc5470dc-e75c-4bb3-9a18-9816fda586a5"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JUNE_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2170" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="3a1d44b0-7d8a-4b09-ae3a-db7f4db86cd1"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JUNE_Fact}-$V{RC_JUNE_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="78faf813-bd12-40ad-9914-2353635c1616"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JULY_Fact}-$V{RC_JULY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2370" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="2f2dcd8b-77c4-4056-a9af-b0a585d99fe9"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JULY_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2270" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="44e2ac94-255e-43d5-a57f-e83ac72d756c"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_JULY_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2670" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="6ba19664-bfc1-4b77-aca1-dd78f6c2122e"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_AUGUST_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2770" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="20724ba0-d38f-41ce-8931-f2c86476c308"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_AUGUST_Fact}-$V{RC_AUGUST_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2570" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="a5323ab1-e304-4dea-819c-1eab422ce42a"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_AUGUST_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2870" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="02454b6e-f414-4598-940f-11b925b36439"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SEPTEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3070" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="6cce1ff6-d7d4-4486-b05f-cbb090e1e2cb"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SEPTEMBER_Fact}-$V{RC_SEPTEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="2970" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="b5f38660-7289-4de7-8d7a-ad5ea7435d99"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SEPTEMBER_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3370" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="a29d6f3e-d0e3-4b94-807e-210e8700fdfd"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_OCTOBER_Fact}-$V{RC_OCTOBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3270" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="4dfeffc4-8d4e-4b5b-82a2-c87f0a0d4f6b"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_OCTOBER_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3170" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="77606f1f-3c6c-4305-9692-116007d92284"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_OCTOBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="c0f024fb-031a-4e01-9eaf-15e790811241"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_NOVEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3670" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="97a22fc9-18d0-44a6-b2ff-3676ff73b59d"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_NOVEMBER_Fact}-$V{RC_NOVEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3570" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="5911cee2-ca9c-400b-801e-7aea176a6db4"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_NOVEMBER_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3770" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="9cde35f4-9d5f-4468-8fbe-764afa29b609"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_DECEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3870" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="25c3ed8b-4223-48b8-b382-0d31fc274d70"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_DECEMBER_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="3970" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="a276f61b-f112-4968-a8bf-0372c88558aa"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_DECEMBER_Fact}-$V{RC_DECEMBER_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4070" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="aa0661f2-3622-41d6-a744-c7c522fb3f5b"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter1_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4170" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="3bb5fbbb-0631-4e67-9843-ce6ee5ba96d0"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter1_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4270" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="6e9c1da5-2574-4cf0-8cab-a801b8eeedce"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter1_Fact}-$V{RC_quarter1_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="d138d2f1-3ebb-4a5c-8368-3ad425810a6d"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter2_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4570" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="c0392f1f-ea50-41cf-b350-32785af7f76b"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter2_Fact}-$V{RC_quarter2_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4370" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="ba380f45-b7e6-47cf-b68c-ab2705d17105"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter2_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4770" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="8a1ddf7d-95bd-4862-8fa7-f1a58aa04bb4"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter3_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4870" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="544f350e-c338-44b1-864b-d70a2074192c"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter3_Fact}-$V{RC_quarter3_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4670" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="1bed27bc-7882-41e3-8eb1-68a5eba61c4f"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter3_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="4970" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="e5fed3a9-9ec1-4e01-8b88-6807e6a3c26d"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter4_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="5070" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="5522e563-dd02-4c74-8e0d-fa84d273c8e6"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter4_Fact}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="5170" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="0d2f8db5-6a91-4421-b9d6-f0953719f83e"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_quarter4_Fact}-$V{RC_quarter4_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="5270" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="01819e95-3054-47eb-9156-e08bde2070c1"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_YEAR_SUMM_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="5470" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="d5f0a0ce-8bff-4c10-92ad-ddff7b3a6842"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_YEAR_SUMM_Fact}-$V{RC_YEAR_SUMM_Plan}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="5370" y="0" width="100" height="20" backcolor="#CCCCCC" uuid="7127c8ae-c6ab-4a89-9653-52112c549feb"/>
+					<box rightPadding="4">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_YEAR_SUMM_Fact}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="5570" height="30" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b240c981-e218-48cb-9f34-18f93c823431"/>
+				<box leftPadding="20">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Звіт по параметру "'+ $F{PARAM_NAME} +'" ПАТ "РАДИКАЛ БАНК" за '+ $F{PLANYEAR} +' рік']]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="55">
+			<staticText>
+				<reportElement x="470" y="25" width="300" height="30" uuid="c1a89a21-825c-4ec2-a449-feb4c240c43e"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Січень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="770" y="25" width="300" height="30" uuid="281df9d4-486e-43c0-b41e-cf7b6aa4661e"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Лютий]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1070" y="25" width="300" height="30" uuid="ee2f99e5-7868-4005-9453-2e13afc5ce11"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Березень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="900" height="25" uuid="22de40a5-dab1-420a-89c2-563e219643d4"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[I квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="200" height="55" uuid="f6e4345b-32cd-4bf6-8aa0-4c253172c4ab"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ТОБО]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="0" width="70" height="55" uuid="50de819a-1c41-4811-badd-0198fce5ed03"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Код Тобо]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="0" width="150" height="55" uuid="efcb14fd-3a4b-4d11-8870-272b4495a93d"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Рег. Упр.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="55" uuid="08f994d6-5275-4fa1-9039-8985bc7ee68e"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Код Рег.Упр.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1370" y="25" width="300" height="30" uuid="02c4229d-fb8f-4567-8b22-5a774fbb174f"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Квітень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1970" y="25" width="300" height="30" uuid="cdb8f0e6-96a2-4c62-bdeb-e79a9b43475f"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Червень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1370" y="0" width="900" height="25" uuid="134b515c-2777-429e-9f14-9ed7d3345ce5"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[II квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1670" y="25" width="300" height="30" uuid="69ff1753-b391-482f-aee9-4a09825b36c2"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Травень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2270" y="25" width="300" height="30" uuid="a68765e0-5d00-4a15-8c87-151ac3945a92"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Липень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2270" y="0" width="900" height="25" uuid="4b9d7c88-04a4-4195-9e88-9f8ead6d2a45"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[III квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2870" y="25" width="300" height="30" uuid="5c190b64-273a-47ac-a870-8d56b85d20ab"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Вересень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2570" y="25" width="300" height="30" uuid="2b0119d4-032f-4289-a170-c87ac710b462"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Серпень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3170" y="25" width="300" height="30" uuid="dbdc8177-10ed-44eb-a1ff-f3933b2a4a8d"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Жовтень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3470" y="25" width="300" height="30" uuid="ede7db13-1f45-4c89-b0ce-2cf15530aaf8"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Листопад]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3770" y="25" width="300" height="30" uuid="f8e3566b-b0ba-4795-a12c-5d05f6e5683f"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Грудень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3170" y="0" width="900" height="25" uuid="b3540fc6-6ca5-4d00-bca0-791161f35f95"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VI квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4070" y="0" width="300" height="55" uuid="bd2a65d4-8448-4e7b-b4c1-430a23ea208a"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[I квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4370" y="0" width="300" height="55" uuid="f466cc00-bcf3-4cba-af5f-e5f2fb2cde00"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[II квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4670" y="0" width="300" height="55" uuid="af4b8935-7129-4595-8f72-9d9269d7745a"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[III квартал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5270" y="0" width="300" height="55" uuid="398d09ee-9d50-41a8-9229-12c82279eb51"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Всього за рік]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4970" y="0" width="300" height="55" uuid="dc060296-bbc8-4b54-b495-0294aca00f16"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VI квартал]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30">
+			<staticText>
+				<reportElement x="470" y="0" width="100" height="30" uuid="0506053b-cf32-4c70-b285-aa49705aed20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="30" uuid="89baa998-ae6b-42ac-988f-0b5eaaa6e7a6">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="Start"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="0" width="150" height="30" uuid="10f483b0-2008-4730-b814-c666599ede76"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="0" width="70" height="30" uuid="6cb2d570-315f-4799-8d70-5ac5ccac5788"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="200" height="30" uuid="f51a4f64-7095-405e-9069-c8a333c1bbbd">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="End"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="570" y="0" width="100" height="30" uuid="0077bf7e-a7ed-4ff9-baa6-7e95b09c6dbd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="670" y="0" width="100" height="30" uuid="dfa8319a-413a-41e7-a62a-658aceeca236"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="970" y="0" width="100" height="30" uuid="0ff2225d-e6a5-47d0-94f3-f87f1cb61756"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="771" y="0" width="100" height="30" uuid="ffe02d4d-2230-490b-a40f-ac3d179d9e93"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="870" y="0" width="100" height="30" uuid="e947ad9a-97eb-4033-b56e-40c945408bc5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1170" y="0" width="100" height="30" uuid="a0b2acdd-a9df-439f-baba-9e89ae690173"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1270" y="0" width="100" height="30" uuid="d8ed4f2e-c3da-4826-97eb-dda309743356"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1070" y="0" width="100" height="30" uuid="25ba3859-52bb-473f-83dc-604afa77d811"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1970" y="0" width="100" height="30" uuid="559052ca-c541-441a-8d58-d479a8467816"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2170" y="0" width="100" height="30" uuid="b4eabfba-af7a-4b63-97dc-c1a36ec052e1"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1770" y="0" width="100" height="30" uuid="42bcc59f-3128-4096-8ff3-7d5a8023d569"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1870" y="0" width="100" height="30" uuid="3e383211-fe93-4ec7-a734-9be52a4385be"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2070" y="0" width="100" height="30" uuid="257aa666-8b5d-4a0f-bc49-733e76c85751"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1670" y="0" width="100" height="30" uuid="503df1ce-6d1d-4cf9-970d-e334f71129d0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2670" y="0" width="100" height="30" uuid="e4bdccf8-a2fb-43be-b35e-3d95108d06fe"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2370" y="0" width="100" height="30" uuid="2e43f2dd-c895-4fa3-b966-cf0f6f5f0734"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2470" y="0" width="100" height="30" uuid="db6f8156-5dc8-4573-9006-08252aa5ecb5"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2870" y="0" width="100" height="30" uuid="14c312fe-5b3c-4442-9fb2-08c264876afd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2570" y="0" width="100" height="30" uuid="66615a0a-c62a-4155-828a-18af800e5eeb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3070" y="0" width="100" height="30" uuid="8b14ecc1-0f40-4b68-8360-8d0b18472b8e"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2770" y="0" width="100" height="30" uuid="161207e1-e3f8-4af5-b7e2-064d9bfbab71"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2970" y="0" width="100" height="30" uuid="e63c0011-5a9a-40a9-a51e-69eb48419c98"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2270" y="0" width="100" height="30" uuid="a48fba69-006c-4863-afe2-b77c9cf52955"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3270" y="0" width="100" height="30" uuid="0747195c-20b3-4165-a7bd-cc7a4de83d14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3170" y="0" width="100" height="30" uuid="d0d54b6a-820a-42e1-a534-ee503d6ebf8b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3370" y="0" width="100" height="30" uuid="9f3c13c5-7634-41fe-b5a4-e794e6873cc0"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3670" y="0" width="100" height="30" uuid="73c27f76-a90e-4ccb-b223-83250050fb2b"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3470" y="0" width="100" height="30" uuid="a3965413-9619-4bde-bc6f-c55bf78cbc37"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3570" y="0" width="100" height="30" uuid="62bbbdf7-9025-4801-9e95-8c154e01b638"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3970" y="0" width="100" height="30" uuid="29705f51-1c8f-4526-a9bf-176ad267b7cf"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3870" y="0" width="100" height="30" uuid="a1fcd077-6416-4439-8eb5-6cebb9163176"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3770" y="0" width="100" height="30" uuid="d43d5536-d6d7-4855-b4d2-155485e3ea89"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5470" y="0" width="100" height="30" uuid="a5686b76-6a32-481a-8a67-31fc25626707"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5270" y="0" width="100" height="30" uuid="f994e746-2147-42fe-9eb2-7b9479b01210"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5370" y="0" width="100" height="30" uuid="a1cca174-fb80-4b79-afa1-b6def7a00589"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4270" y="0" width="100" height="30" uuid="1fcb6746-fc84-4801-9e14-558155c2178b"/>
+				<box rightPadding="0">
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4070" y="0" width="100" height="30" uuid="66533fe2-6012-4d52-a10a-3338e3a99d5f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4170" y="0" width="100" height="30" uuid="fe1472ff-2c80-4708-895c-dae74e3c2004"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4570" y="0" width="100" height="30" uuid="96320ae8-8e3f-4a4d-8f67-1b73d4c3a038"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4370" y="0" width="100" height="30" uuid="1f4a48bf-a6b7-4395-901a-7bd29d363921"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4470" y="0" width="100" height="30" uuid="cab0df16-770f-4e10-9b33-b98a47514957"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4870" y="0" width="100" height="30" uuid="beec8473-6d46-42ff-af17-c8b8cfc48f36"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4670" y="0" width="100" height="30" uuid="3798a91e-00d7-44d0-8fb4-3a1dd447590e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4770" y="0" width="100" height="30" uuid="21202d41-1b59-435b-be4d-ffa043470ef2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5170" y="0" width="100" height="30" uuid="8cd3a1e2-a27f-4706-8c92-f8e186a6688c"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4970" y="0" width="100" height="30" uuid="95b45e34-6e2f-4c64-b248-3cb7f395c73b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5070" y="0" width="100" height="30" uuid="70660ab8-5830-4295-b449-82e3f8657e28"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1570" y="0" width="100" height="30" uuid="4d5d634b-6d15-45f1-83a9-6485d64eefb5"/>
+				<box>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Різниця]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1370" y="0" width="100" height="30" uuid="9452537e-2596-4940-ac64-bc03a2dda222"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[План]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1470" y="0" width="100" height="30" uuid="275bf45d-9b4c-4cbc-ab61-f1bedc202105"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Факт]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="470" y="0" width="100" height="13" uuid="b9884820-45a3-490b-95f8-706aa2e92ceb"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JANUARY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="50" height="13" uuid="ec3bb7d2-ef38-476a-baf0-22fee3daab19"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RC_ID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="0" width="150" height="13" uuid="c4bfa87b-e930-4a5a-a822-7c4b2d02b214"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RC_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="70" height="13" uuid="2c955d2e-0508-4e8a-924b-72237d3e6d8b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_ID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="0" width="200" height="13" uuid="34f6e54d-10e1-4be4-852f-6eaecbf56ce3"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="570" y="0" width="100" height="13" uuid="ed616273-0fc3-4bf9-a8c1-808cefa5065d"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JANUARY_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="670" y="0" width="100" height="13" uuid="d52c8e60-2584-4418-820a-70305a67b703"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JANUARY_FACT}-$F{JANUARY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="770" y="0" width="100" height="13" uuid="0072f676-32f5-4488-a779-f3388b6aed93"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FEBRUARY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="970" y="0" width="100" height="13" uuid="1949df91-a17c-4cae-b5b7-48068a2493de"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FEBRUARY_FACT}-$F{FEBRUARY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="870" y="0" width="100" height="13" uuid="295ed3ee-437b-4f88-a923-0f693796ac8d"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FEBRUARY_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1270" y="0" width="100" height="13" uuid="74829b8b-aa2d-45da-9f9e-88092ea2947f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MARCH_FACT}-$F{MARCH_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1070" y="0" width="100" height="13" uuid="b983f5b8-30f9-4203-9477-9215f8ab3bcc"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MARCH_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1170" y="0" width="100" height="13" uuid="91bb5d3a-dfe6-434d-9f6b-5e3e1ebda367"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MARCH_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1570" y="0" width="100" height="13" uuid="9c53b51d-68f9-4719-b858-deaf72c94ae2"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{APRIL_FACT}-$F{APRIL_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1470" y="0" width="100" height="13" uuid="1fb49440-6544-4070-88f1-004433ccc843"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{APRIL_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1370" y="0" width="100" height="13" uuid="9fafeb04-fdb0-4862-8812-ff7605a03638"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{APRIL_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1870" y="0" width="100" height="13" uuid="7a5af02f-f9eb-465d-846a-9018483d33d0"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MAY_FACT}-$F{MAY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1670" y="0" width="100" height="13" uuid="c0bf8163-da14-4f3e-a426-511a67c4589c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MAY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1770" y="0" width="100" height="13" uuid="7a0a854e-3a70-4f46-8c6d-c032bb8499c8"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MAY_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="1970" y="0" width="100" height="13" uuid="191963c7-e32c-4b00-a661-f5492ff72c7c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JUNE_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2170" y="0" width="100" height="13" uuid="2a9510f1-db3c-4dcf-b93f-979abc4731c5"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JUNE_FACT}-$F{JUNE_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2070" y="0" width="100" height="13" uuid="82d26f68-7875-450e-9543-febc42819317"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JUNE_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2370" y="0" width="100" height="13" uuid="7aea5d57-32c7-402e-b5fd-6ef4d8b26e27"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JULY_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2270" y="0" width="100" height="13" uuid="d51e74a8-26c1-4cf1-a744-fd1680845ec0"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JULY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2470" y="0" width="100" height="13" uuid="5b5c95ed-06a1-4933-9f48-c79b8d282bcc"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JULY_FACT}-$F{JULY_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2770" y="0" width="100" height="13" uuid="927d745b-e71b-4beb-9de4-e2bb8cffb962"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AUGUST_FACT}-$F{AUGUST_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2570" y="0" width="100" height="13" uuid="73e5094a-d8f8-485d-b449-59866699f307"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AUGUST_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2670" y="0" width="100" height="13" uuid="cda6da34-5151-41e9-857a-a9932584adfb"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AUGUST_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3070" y="0" width="100" height="13" uuid="a05ce9b4-6bb1-447e-9d1d-58336ec56a84"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEPTEMBER_FACT}-$F{SEPTEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2970" y="0" width="100" height="13" uuid="6d27debb-6afe-49a9-9300-3ee2052837a5"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEPTEMBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="2870" y="0" width="100" height="13" uuid="930e8b43-649d-4125-b5b0-eea6b27d92a3"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEPTEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3170" y="0" width="100" height="13" uuid="80e05a2b-9332-4d0d-a754-043b0977cf1c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OCTOBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3370" y="0" width="100" height="13" uuid="0b42271e-17a1-4281-9b67-568a402f3b72"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OCTOBER_FACT}-$F{OCTOBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3270" y="0" width="100" height="13" uuid="1caa147c-1c6a-49a7-abec-9d65371de58c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OCTOBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3970" y="0" width="100" height="13" uuid="177fc265-2789-4369-b7ad-9874cef5e00f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DECEMBER_FACT}-$F{DECEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3770" y="0" width="100" height="13" uuid="ecbc2d3e-1dba-4519-b9d3-4f1887eb7207"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DECEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3870" y="0" width="100" height="13" uuid="5ad8cbb5-2038-4f63-bc59-a9fbf6c2747c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DECEMBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4070" y="0" width="100" height="13" uuid="76336ec7-db8b-4d43-a337-86a35744a71e"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JANUARY_PLAN}+$F{FEBRUARY_PLAN}+$F{MARCH_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4170" y="0" width="100" height="13" uuid="a1f27970-3c8f-4943-9a92-68e5139a5fd6"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JANUARY_FACT}+$F{FEBRUARY_FACT}+$F{MARCH_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4270" y="0" width="100" height="13" uuid="1e8ff6be-65f0-426c-8646-e99bcd9f13d9"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{JANUARY_FACT}+$F{FEBRUARY_FACT}+$F{MARCH_FACT}) - ($F{JANUARY_PLAN}+$F{FEBRUARY_PLAN}+$F{MARCH_PLAN})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4470" y="0" width="100" height="13" uuid="a5972dfa-1ea2-46a2-8745-befbb158d0d2"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{APRIL_FACT}+$F{MAY_FACT}+$F{JUNE_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4370" y="0" width="100" height="13" uuid="3f6094b9-5bae-4b1a-9185-dd0dfd32a4ea"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{APRIL_PLAN}+$F{MAY_PLAN}+$F{JUNE_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4870" y="0" width="100" height="13" uuid="153229bb-306c-47fc-b876-6c02fc8afb1e"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{JULY_FACT}+$F{AUGUST_FACT}+$F{SEPTEMBER_FACT}) - ($F{JULY_PLAN}+$F{AUGUST_PLAN}+$F{SEPTEMBER_PLAN})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4670" y="0" width="100" height="13" uuid="cfafd881-2c1a-4b49-9b0f-10e53cb954c0"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JULY_PLAN}+$F{AUGUST_PLAN}+$F{SEPTEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4770" y="0" width="100" height="13" uuid="170cb654-26bf-4852-b63f-503898f6fd84"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JULY_FACT}+$F{AUGUST_FACT}+$F{SEPTEMBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="5170" y="0" width="100" height="13" uuid="0c84f55c-857c-4a58-8266-e892b4c58196"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{OCTOBER_FACT}+$F{NOVEMBER_FACT}+$F{DECEMBER_FACT}) - ($F{OCTOBER_PLAN}+$F{NOVEMBER_PLAN}+$F{DECEMBER_PLAN})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4970" y="0" width="100" height="13" uuid="80dfa23b-4b91-40a5-a239-12776ed6e631"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OCTOBER_PLAN}+$F{NOVEMBER_PLAN}+$F{DECEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="5070" y="0" width="100" height="13" uuid="ec5d21ea-b7ff-45bc-b95b-6979c51e5a49"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OCTOBER_FACT}+$F{NOVEMBER_FACT}+$F{DECEMBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="5270" y="0" width="100" height="13" uuid="eecc3cc6-b92a-4fa6-9b1a-f68c004122a2"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{YEAR_SUMM_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="5470" y="0" width="100" height="13" uuid="03b10639-2c66-4a16-b4fc-03d59f2df48b"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{YEAR_SUMM_FACT}-$F{YEAR_SUMM_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="5370" y="0" width="100" height="13" uuid="6b09529f-a72e-46f6-9257-333836b18441"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{YEAR_SUMM_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3670" y="0" width="100" height="13" uuid="56c4a77b-a3f9-4b8b-b3ae-f62984128906"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NOVEMBER_FACT}-$F{NOVEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3470" y="0" width="100" height="13" uuid="8f14bec0-4d73-4ba7-ad5c-b55476581b7d"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NOVEMBER_PLAN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="3570" y="0" width="100" height="13" uuid="0d490f2d-feb1-4a32-b248-29b0c7fed4fe"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NOVEMBER_FACT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="4570" y="0" width="100" height="13" uuid="48402ef7-af12-41a2-bf24-c4f5e9be1934"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{APRIL_FACT}+$F{MAY_FACT}+$F{JUNE_FACT}) - ($F{APRIL_PLAN}+$F{MAY_PLAN}+$F{JUNE_PLAN})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="470" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="324bc402-bf64-4946-9c39-42a7f3fcd139"/>
+				<box leftPadding="20"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Всього :]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="570" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="74d7bb66-4317-429b-9cb3-8536164c255f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JANUARY_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="f1a40bdc-84ed-41b9-a1cc-318c1c800fa8"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JANUARY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="670" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="d2600f54-23f5-402e-a2e9-937ce3d6eb0c"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JANUARY_Fact}-$V{All_JANUARY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="970" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="4fddc961-4638-47e3-a1df-990d040d8946"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_FEBRUARY_Fact}-$V{All_FEBRUARY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="770" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b4e7e2f0-60cc-4c19-a79e-5f5659eb8c86"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_FEBRUARY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="870" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="9aadd6ec-2ea3-4f2e-851e-8952c29c23a9"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_FEBRUARY_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1070" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="2be6e182-1cca-4b27-8a71-4031d7800d9f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MARCH_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1170" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="de3a9b8d-71ba-4378-8a8c-6ccd128f6cde"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MARCH_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1270" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="7be2cbe9-5366-445a-8540-c08d3bbef9c1"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MARCH_Fact}-$V{All_MARCH_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="e4cc0c4b-4c59-4397-a2a3-43481e68e24a"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_APRIL_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1570" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="57e63638-027a-42a5-851e-b4bd235f9187"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_APRIL_Fact}-$V{All_APRIL_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1370" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="c1867d02-d6e3-45dd-9c2f-dc1e1839a52e"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_APRIL_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1770" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="ba8ac3bf-f87b-4049-86b8-3f40d0dddbc8"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MAY_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1870" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="c68147d5-1d47-4554-8924-7943e4baa777"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MAY_Fact}-$V{All_MAY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1670" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="bc66e7a6-3155-4db0-9fc2-007760106437"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_MAY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="1970" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="13c3523c-a932-4088-aed3-8af37d8bb140"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JUNE_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2070" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="44a32961-cf75-4c91-b80e-62cd3fc71080"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JUNE_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2170" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="12e285b9-7563-45bb-bdf3-9d6ea5278a8b"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JUNE_Fact}-$V{All_JUNE_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2370" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="f484e5a8-04a4-43ed-b427-91b1975cf56f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JULY_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2270" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="d5eb9a9d-da61-4e66-be20-36ecfc0ed775"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JULY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="f101046d-0b08-4dfb-bb92-e0dbb11104cd"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_JULY_Fact}-$V{All_JULY_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2670" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="d26d0f03-f108-4ce9-b6e1-17e621453156"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_AUGUST_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2570" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="8da039b9-97c8-4301-a592-e28df54e10cf"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_AUGUST_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2770" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="9d0c74b9-ab61-4cf9-9c98-d39eb1748b69"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_AUGUST_Fact}-$V{All_AUGUST_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3070" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="901a83d9-c30f-40a3-8ffa-5baad1ea8a38"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SEPTEMBER_Fact}-$V{All_SEPTEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2970" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="2b18029b-5a93-468e-a5c2-1cbbb1263593"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SEPTEMBER_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="2870" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b7386be4-5707-46b5-9fb4-4a9e19c8969d"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SEPTEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3270" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="96a80515-5f9b-4f8b-aff9-aa99582d46e2"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_OCTOBER_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3170" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="ab0075d1-1c10-4a96-9f80-c723ef8824f3"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_OCTOBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3370" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="64f44860-fed0-4671-ba61-15a9242fca9b"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_OCTOBER_Fact}-$V{All_OCTOBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3570" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b85b5f62-8e94-49b5-a4cd-2aa69b4a66be"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_NOVEMBER_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="7192b609-3a2d-49ea-99e4-3ef90f771cbd"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_NOVEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3670" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="cc3bad93-f2b4-4a90-a471-055f45087fdd"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_NOVEMBER_Fact}-$V{All_NOVEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3870" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="f862cfa7-7932-4133-a2a2-f133d50f3d16"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_DECEMBER_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3970" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="76fad183-60e4-426e-af2e-06e25d621b3a"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_DECEMBER_Fact}-$V{All_DECEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="3770" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="e9db9542-8a5b-47ea-8f25-cc25430e0804"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_DECEMBER_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4270" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="7a3cb9f8-14a6-4c68-8a57-49a51e916430"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter1_Fact}-$V{All_quarter1_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4070" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="27b067c4-2abb-4cb2-b86c-20ac798cde2b"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter1_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4170" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="443a21b6-662e-4146-b68e-2f2b7d012076"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter1_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="bee02e83-ef78-420d-acd4-3f18ba407a22"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter2_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4370" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="60d0b584-9933-4a7d-8896-cfecfc3a201e"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter2_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4570" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="fe73d242-0101-4f9e-b45f-8e2f8021ce65"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter2_Fact}-$V{All_quarter2_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4870" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="fb9a78a6-14ba-4b92-88eb-c41c5122ceb8"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter3_Fact}-$V{All_quarter3_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4670" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="e0f3ec0d-9bd5-4aa5-85be-3401ff2d5bb7"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter3_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4770" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="35bfe1e4-ce2c-4d19-b09c-3ac811b63480"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter3_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="4970" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="abaa4807-4c9e-4a43-9697-d777db175c71"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter4_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="5070" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="9ea73be9-3cb8-43de-9b39-d32acf736ea9"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter4_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="5170" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="71438fee-2ece-4330-a8ce-65869c6a6b8f"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_quarter4_Fact}-$V{All_quarter4_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="5470" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="6274416c-3b1e-49d3-8931-d6d00c7e5df8"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_YEAR_SUMM_Fact}-$V{All_YEAR_SUMM_Plan}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="5370" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="9590d7c3-e298-43c9-a028-52d628207990"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_YEAR_SUMM_Fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="5270" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="52d2b9fb-26ba-4889-8cbd-9559da5c71cf"/>
+				<box rightPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_YEAR_SUMM_Plan}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

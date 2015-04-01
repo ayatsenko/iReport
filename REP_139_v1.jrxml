@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="1150" pageHeight="842" whenNoDataType="BlankPage" columnWidth="1150" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="66c639d5-fdaf-4a28-8d89-146aa7fdbbeb">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.column" value="C"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<parameter name="Startdate" class="java.util.Date">
+		<parameterDescription><![CDATA[Початкова дата]]></parameterDescription>
+	</parameter>
+	<parameter name="Enddate" class="java.util.Date">
+		<parameterDescription><![CDATA[Кінцева дата]]></parameterDescription>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call FDI_BANK.FDIPKG_REPORTS.REPORT_139($P{Startdate},$P{Enddate},$P{ORACLE_REF_CURSOR})}]]>
+	</queryString>
+	<field name="ACCOUNTNO" class="java.lang.String"/>
+	<field name="CURRENCYID" class="java.math.BigDecimal"/>
+	<field name="TOBOID" class="java.math.BigDecimal"/>
+	<field name="SNAME" class="java.lang.String"/>
+	<field name="DESCRIPTION" class="java.lang.String"/>
+	<field name="DATEOPEN" class="java.util.Date"/>
+	<field name="DATECLOSE" class="java.util.Date"/>
+	<field name="ACCOUNT_TURNOVER" class="java.math.BigDecimal"/>
+	<field name="FRACC_NBU" class="java.lang.String"/>
+	<field name="FRACC_MA" class="java.lang.String"/>
+	<title>
+		<band height="80" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="1150" height="40" backcolor="#66CCFF" uuid="e58c21ab-da61-4bc7-a360-7e0172d1c02c"/>
+				<box leftPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Техкарта формування ФР по ТВБВ за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{Startdate}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{Enddate}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="40" width="200" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="73bb5f9a-e454-4675-bae4-6e2a82b92683">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="Start"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Аналітичний рахунок]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="200" y="40" width="50" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="73a97d39-010c-40e9-b68e-f85e8706554a"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Валюта]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="250" y="40" width="250" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="5a37f294-8fd4-40c1-a7f8-5fde0d10aa7b"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Назва рахунку]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="700" y="40" width="100" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="d42ea764-3d2b-45be-9d8c-3ee20f39cae1"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Код відділ.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="500" y="40" width="100" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="4fac2970-723c-4741-9861-0b78f8794398"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Дата відкриття]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="800" y="40" width="150" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="46aa9ba5-b050-4871-9c1d-746bb0446ca3"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Результат]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="950" y="40" width="100" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="734cec40-96f7-4f46-ad9b-81c45821e004"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" isUnderline="false" isStrikeThrough="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="Single" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Код статті ФР_НБУ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="600" y="40" width="100" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="1c97dad7-e35a-438e-8766-3c4772cbaed7"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Дата відкриття]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1050" y="40" width="100" height="40" forecolor="#000000" backcolor="#FFFF33" uuid="a0aebe0a-2e63-43f1-81d4-9d5877bfec76">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="End"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Код статті ФР_УПРАВЛ.]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="20">
+			<textField>
+				<reportElement x="200" y="0" width="50" height="20" uuid="8e3167bf-52c5-4afb-982e-d4f63336cc04"/>
+				<box leftPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CURRENCYID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd.MM.yyyy">
+				<reportElement x="500" y="0" width="100" height="20" uuid="b2f6c0c2-926a-4a7b-beef-86cca5533ddf"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEOPEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="700" y="0" width="100" height="20" uuid="dc087598-9a91-499c-8106-5aae03dd160a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOBOID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="200" height="20" uuid="7ab61283-4eda-4495-b828-57e9ecf5f77c"/>
+				<box leftPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNTNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="800" y="0" width="150" height="20" uuid="99e87682-4b41-4edc-9201-ef403d82efae"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_TURNOVER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="950" y="0" width="100" height="20" uuid="c64ee139-0bae-401e-bf9e-6fafeca288c8"/>
+				<box leftPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FRACC_NBU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="250" y="0" width="250" height="20" uuid="d296c54b-5033-4858-a779-325627dd33ea"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd.MM.yyyy">
+				<reportElement x="600" y="0" width="100" height="20" uuid="298fc1d1-0316-4f3b-8830-ee0617630948"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATECLOSE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1050" y="0" width="100" height="20" uuid="5f4b9c0d-5d44-4eca-9a61-28f54fbf4e67"/>
+				<box leftPadding="4">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FRACC_NBU}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

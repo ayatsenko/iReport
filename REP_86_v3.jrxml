@@ -1,0 +1,3655 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" language="groovy" pageWidth="1590" pageHeight="595" orientation="Landscape" columnWidth="1590" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="5727b514-5c58-45bc-a814-cf5ebf5acb84">
+	<property name="ireport.zoom" value="1.1000000000000103"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="4"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.column" value="D"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<property name="detectCellType" value="false"/>
+	<parameter name="Datestart" class="java.util.Date">
+		<parameterDescription><![CDATA[Початкова дата]]></parameterDescription>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Dateend" class="java.util.Date">
+		<parameterDescription><![CDATA[Кінцева дата]]></parameterDescription>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+d.branch_id,
+BRA.BRANCH_NAME,
+d.currency_id,
+-- Остаток на начало периода
+round(D.DAY1_SUMMA.summa/100,2) sumavg_d1,
+round(D.DAY1_SUMMA.summaeq/100,2) sumavgeq_d1d1,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Dateend},d.currency_id,D.DAY1_SUMMA.summa)/100,2) sumavgeq_d1d2,
+-- Привлечено за период
+round(D.SUM_DOST_INP/100,2) dost_inp_suma,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Dateend},d.currency_id,D.SUM_DOST_INP)/100,2) dost_inp_sumavgeq_d1,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Datestart},d.currency_id,D.SUM_DOST_INP)/100,2) dost_inp_sumavgeq_d2,
+-- Открыто счетов за период
+D.COUNT_OP_ACC,
+-- Досрочное расторжение
+round(D.SUM_DOST_OUTP/100,2) dost_outp_suma,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Dateend},d.currency_id,D.SUM_DOST_OUTP)/100,2) dost_outp_sumavgeq_d1,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Datestart},d.currency_id,D.SUM_DOST_OUTP)/100,2) dost_outp_sumavgeq_d2,
+-- Всего возврат за период
+round(D.SUM_OUTP/100,2) outp_suma,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Dateend},d.currency_id,D.SUM_OUTP)/100,2) outp_sumavgeq_d1,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Datestart},d.currency_id,D.SUM_OUTP)/100,2) outp_sumavgeq_d2,
+-- Остаток на конец периода
+round(D.DAY31_SUMMA.summa/100,2) sumavg_d2,
+round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{Datestart},d.currency_id,D.DAY1_SUMMA.summa)/100,2) sumavgeq_d2d1,
+round(D.DAY31_SUMMA.summaeq/100,2) sumavgeq_d2d2
+
+from(
+select  branch_id,
+        currency_id,
+-- Остаток на начало периода
+        fdi_bank.FDIPKG_PLANFACT.fn_getDayDepoPortPhP($P{Datestart},branch_id,currency_id)        DAY1_SUMMA,
+-- Привлечено за период
+        round(sum(c.SUM_DOST_INP)/100,2) SUM_DOST_INP,
+-- Открыто счетов за период
+        fdi_bank.FDIPKG_PLANFACT.fn_getDepoAccOpenPhP($P{Datestart}, $P{Dateend},branch_id,currency_id) COUNT_OP_ACC,
+-- Досрочное расторжение
+        round(sum(c.SUM_DOST_OUTP)/100,2) SUM_DOST_OUTP,
+-- Всего возврат за период
+        round(sum(c.SUM_OUTP)/100,2) SUM_OUTP,
+        fdi_bank.FDIPKG_PLANFACT.fn_getDayDepoPortPhP($P{Dateend},branch_id,currency_id)        DAY31_SUMMA
+    from (
+        (-- Привлечено за период
+    select  CD.TOBOID branch_id,
+            CDT.CURRENCYID currency_id,
+            CDT.SUMMA SUM_DOST_INP,
+            0 SUM_DOST_OUTP,
+            0 SUM_OUTP
+            from creator.arc_document cdt, CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=1
+            AND CDT.ARCDATE >= $P{Datestart}
+            AND CDT.ARCDATE <= $P{Dateend}
+--            AND CDT.CURRENCYID in (978,840,980,643)
+            )
+union all
+        (-- Досрочное расторжение
+    select CD.TOBOID branch_id,
+           CDT.CURRENCYID currency_id,
+           0 SUM_DOST_INP,
+           CDT.SUMMA SUM_DOST_OUTP,
+           0 SUM_OUTP
+           from creator.arc_document cdt, CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=2
+            AND CDT.ARCDATE >= $P{Datestart}
+            AND CDT.ARCDATE <= $P{Dateend}
+--            AND CDT.CURRENCYID in (978,840,980,643)
+            AND CDDT.ARCDATE<CD.MATURITYDATE)
+union all
+        (--Всего возврат за период
+    select
+    CD.TOBOID branch_id,
+    CDT.CURRENCYID currency_id,
+    0 SUM_DOST_INP,
+    0 SUM_DOST_OUTP,
+    CDT.SUMMA SUM_OUTP
+            from creator.arc_document cdt,CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=2
+            AND CDT.ARCDATE >= $P{Datestart}
+            AND CDT.ARCDATE <= $P{Dateend}
+--            AND CDT.CURRENCYID in (978,840,980,643)
+            )) c
+group by branch_id, currency_id
+order by branch_id, currency_id
+) d,
+FDI_BANK.BRANCH BRA
+where
+D.BRANCH_ID = BRA.BRANCH_ID
+ORDER BY branch_id, currency_id desc]]>
+	</queryString>
+	<field name="BRANCH_ID" class="java.math.BigDecimal"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="CURRENCY_ID" class="java.math.BigDecimal"/>
+	<field name="SUMAVG_D1" class="java.math.BigDecimal"/>
+	<field name="SUMAVGEQ_D1D1" class="java.math.BigDecimal"/>
+	<field name="SUMAVGEQ_D1D2" class="java.math.BigDecimal"/>
+	<field name="DOST_INP_SUMA" class="java.math.BigDecimal"/>
+	<field name="DOST_INP_SUMAVGEQ_D1" class="java.math.BigDecimal"/>
+	<field name="DOST_INP_SUMAVGEQ_D2" class="java.math.BigDecimal"/>
+	<field name="COUNT_OP_ACC" class="java.math.BigDecimal"/>
+	<field name="DOST_OUTP_SUMA" class="java.math.BigDecimal"/>
+	<field name="DOST_OUTP_SUMAVGEQ_D1" class="java.math.BigDecimal"/>
+	<field name="DOST_OUTP_SUMAVGEQ_D2" class="java.math.BigDecimal"/>
+	<field name="OUTP_SUMA" class="java.math.BigDecimal"/>
+	<field name="OUTP_SUMAVGEQ_D1" class="java.math.BigDecimal"/>
+	<field name="OUTP_SUMAVGEQ_D2" class="java.math.BigDecimal"/>
+	<field name="SUMAVG_D2" class="java.math.BigDecimal"/>
+	<field name="SUMAVGEQ_D2D1" class="java.math.BigDecimal"/>
+	<field name="SUMAVGEQ_D2D2" class="java.math.BigDecimal"/>
+	<variable name="RC_Summa_D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVG_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_D1_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVG_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVG_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVG_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVG_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D1_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D1}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D1D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_D1D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D1D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_D1D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVGEQ_D1D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D1}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D1D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D1D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_D1D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D1D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D1D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_D1D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVGEQ_D1D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D1D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D1D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D1D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D1D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D1D2}))]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVG_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_D2_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVG_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVG_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVG_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVG_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_D2_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVG_D2}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D1}]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_D2D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D1})]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_D2D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVGEQ_D2D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D1}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D2}]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_D2D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_D2D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D2})]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_D2D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_D2D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{SUMAVGEQ_D2D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{SUMAVGEQ_D2D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{SUMAVGEQ_D2D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{SUMAVGEQ_D2D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_D2D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{SUMAVGEQ_D2D2}))]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Growth" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D2} - $F{SUMAVG_D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Growth" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D2} - $F{SUMAVGEQ_D1D2}]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Growth" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVG_D2} - $F{SUMAVG_D1}]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Growth" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ_D2D2} - $F{SUMAVGEQ_D1D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Inp" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Inp_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Inp_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Inp_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Inp_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Dost_Inp" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Dost_Inp_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_INP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Inp_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMA}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D1}: 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Dost_Inp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Dost_Inp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_INP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D1}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D2}: 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Inp_D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Dost_Inp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_INP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Inp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Dost_Inp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_INP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_INP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_INP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_INP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Inp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_INP_SUMAVGEQ_D2}))]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Op_Acc" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_OP_ACC}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Op_Acc_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Op_Acc_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Op_Acc_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Op_Acc_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{COUNT_OP_ACC})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Op_Acc" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_OP_ACC}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{COUNT_OP_ACC} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{COUNT_OP_ACC})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Op_Acc_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{COUNT_OP_ACC}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{COUNT_OP_ACC} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{COUNT_OP_ACC} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{COUNT_OP_ACC} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Op_Acc_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{COUNT_OP_ACC}))]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Outp" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Outp_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Outp_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Outp_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Dost_Outp_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Dost_Outp" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Dost_Outp_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Dost_Outp_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMA}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Dost_Outp_D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Dost_Outp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Dost_Outp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DOST_OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Dost_Outp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Dost_Outp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D1}))]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Dost_Outp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{DOST_OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{DOST_OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Dost_Outp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{DOST_OUTP_SUMAVGEQ_D2}))]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Outp" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Outp_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Outp_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Outp_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_Summa_Outp_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Outp" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMA} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMA})]]></variableExpression>
+	</variable>
+	<variable name="ALL_Summa_Outp_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{OUTP_SUMA}]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_withoutGO_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_withoutGO_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_withoutGO_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{OUTP_SUMA} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Summa_Outp_withoutGO_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMA}))]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D1" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D1_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D1_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D1_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D1_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D2" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D2_980" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D2_840" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D2_978" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="RC_SummaEq_Outp_D2_Other" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Outp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D1} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D1})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_Outp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D2} : 0]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_Outp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D2})]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Outp_D1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{OUTP_SUMAVGEQ_D1}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D1_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D1_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D1_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D1} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D1_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D1}))]]></variableExpression>
+	</variable>
+	<variable name="ALL_SummaEq_withoutGO_Outp_D2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : $F{OUTP_SUMAVGEQ_D2}]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D2_980" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 980 ? $F{OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D2_840" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 840 ? $F{OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D2_978" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ($F{CURRENCY_ID} == 978 ? $F{OUTP_SUMAVGEQ_D2} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_SummaEq_withoutGO_Outp_D2_Other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_ID} == 1 ?  0 : ((($F{CURRENCY_ID} == 980 ) || ($F{CURRENCY_ID} == 978) || ($F{CURRENCY_ID} == 840) ?  0 : $F{OUTP_SUMAVGEQ_D2}))]]></variableExpression>
+	</variable>
+	<group name="Partner_Group">
+		<groupExpression><![CDATA[$F{BRANCH_ID}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="1590" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="13b82c8f-e9e4-4b2f-9511-f04a87310667">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
+					</reportElement>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+						<paragraph lineSpacing="1_1_2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Відділення № " + $F{BRANCH_ID}+":"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="290" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="0c520630-f157-4490-8a3d-c4cea75f78f1">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
+					</reportElement>
+					<box leftPadding="4" rightPadding="0">
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+						<paragraph lineSpacing="1_1_2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Всього по відділенню № "+$F{BRANCH_ID}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="390" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="c0efe0a9-9d3a-4c6d-a361-c341b9a85092"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_D1D1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="1190" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="3e2a29ca-abeb-4c69-b622-500d6c13a03f"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="1290" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="26d9daa8-4478-44f9-ade2-cac316c2bfa5"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_D2D2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="1490" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="6db2081f-328a-4372-a483-6329d0d92ff6"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_Growth}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="1390" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="9aba3961-ec1d-4084-b6c2-23f2d0e4fc85"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="290" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="086bec16-466c-4ac4-9bda-367e2b437d0b"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="490" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="9f82205d-75c3-4632-8c79-282dce0b1078"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="590" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="6994c6c1-bed4-4423-8c0b-220d555e4a6d"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_Dost_Inp_D2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0">
+					<reportElement mode="Opaque" x="690" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="86bb6c25-8231-4e2e-837f-7b330ded2e56"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_Summa_Op_Acc}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="790" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="154102d8-5828-46ea-930e-f5d2b5cfb688"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="890" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="6da60832-4805-4590-bc76-e56477d724b3"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_Dost_Outp_D2}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="990" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="b4625c0e-b638-48fc-a012-57cd74f8a14c"/>
+					<box>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement mode="Opaque" x="1090" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="45fc4432-d705-468b-904a-8b49984b2a68"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="1.5"/>
+						<leftPen lineWidth="1.5"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{RC_SummaEq_Dost_Outp_D2}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="1290" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="23a00fba-0dfc-423b-9915-5342aa8c8154"/>
+				<box leftPadding="4"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Виконання планів  по залученню пасивів відділеннями ПАТ "РАДИКАЛ БАНК" за період с ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{Datestart})) +' по '+(new SimpleDateFormat("dd.MM.yyyy").format($P{Dateend}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1290" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="018209e8-9dc6-4cf5-8d21-673b0c7ba3b4"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[Дата звіту]]></text>
+			</staticText>
+			<textField pattern="dd.MM.yyyy HH:mm">
+				<reportElement mode="Opaque" x="1390" y="0" width="200" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="e4c112d1-4ff2-4393-bff6-b3586d15f478"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="20" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Код відділ.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="40" y="20" width="200" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Відділення]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="240" y="20" width="50" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Валюта]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="290" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="6bd053fe-1244-47fc-be2e-d72b02bc7d7c"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<textFieldExpression><![CDATA['На ' + (new SimpleDateFormat("dd.MM.yyyy").format($P{Datestart}))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="1190" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="56de08d7-610e-46ec-a63d-38bd33c72b28"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<textFieldExpression><![CDATA['На ' + (new SimpleDateFormat("dd.MM.yyyy").format($P{Dateend}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="68957a7b-6e31-47ac-a846-3cd44e4be5d0"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Операції по залученню вкладів за період]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="690" y="20" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="22e37672-0d03-4a6b-aaa4-07521511dfb8"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Відкрито депозитних рахунків]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="5d812576-a960-4fc3-a6ec-8b029e0a0ffc"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Дострокове  зняття  вкладів]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="90d0c217-507c-44f4-96e1-f6b629cffe45"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Видаткові операції по вкладам за період]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="1390" y="20" width="200" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="f0163ef8-f701-4e3f-b624-1054d273c356"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Приріст на дату ' + (new SimpleDateFormat("dd.MM.yyyy").format($P{Dateend}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20">
+			<staticText>
+				<reportElement mode="Opaque" x="240" y="0" width="50" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="d618d823-4f14-4d48-9348-aab62c370630"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="14ded30d-af42-4e99-b0bf-b355f465741e"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Номінал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="390" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1290" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="5bd4ce8e-6297-4e45-bbdb-15b7e7ca6c75"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1190" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="5d4a7465-b6db-4038-b513-dea56c72f37a"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Сума]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1490" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="3b1ccf26-51a4-44be-82b0-81edd0f45ef0">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="End"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1390" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="45aa3db6-ec4d-473e-923c-24b70909db83"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Номінал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="48208f0f-1595-4646-b2ac-009a6f81d554">
+					<property name="net.sf.jasperreports.export.xls.auto.filter" value="Start"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="40" y="0" width="200" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="8a5e2a6b-1709-4607-b237-a1a1f5d9fbfc"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="690" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="d183a862-0a84-4ddb-bbb7-be6c80a7b9f9"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="590" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="bc284b15-39db-46da-9832-49b42ad6fe3e"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="3ad111a4-4dca-425f-8b00-628027c54554"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Номінал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="890" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="e7ed7887-3fb6-4ded-993b-a676df26f24b"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="10930bb3-1eff-4c8f-affa-3d88303b7932"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Номінал]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1090" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="45cc97c7-b3fe-4b8e-b2f6-0be6b311608b"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="0" width="100" height="20" forecolor="#000000" backcolor="#CCCCCC" uuid="9321af5f-a699-4939-8972-f05f100c7031"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Номінал]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<elementGroup/>
+			<elementGroup>
+				<textField>
+					<reportElement x="40" y="0" width="200" height="13" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+				</textField>
+			</elementGroup>
+			<textField>
+				<reportElement x="0" y="0" width="40" height="13" uuid="8fc22223-41e4-4af6-a969-c090da16e802">
+					<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
+				</reportElement>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_ID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="240" y="0" width="50" height="13" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CURRENCY_ID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="290" y="0" width="100" height="13" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVG_D1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="390" y="0" width="100" height="13" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVGEQ_D1D1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1290" y="0" width="100" height="13" uuid="9f0ac4d0-e0dc-48aa-8e61-69cd9de4f5d0"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVGEQ_D2D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1190" y="0" width="100" height="13" uuid="516e9ef4-c4db-4440-abd9-b83b99d4a0f9"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVG_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1490" y="0" width="100" height="13" uuid="312a8629-e307-46dc-a9eb-ef8e42427d78"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVGEQ_D2D2} - $F{SUMAVGEQ_D1D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1390" y="0" width="100" height="13" uuid="82e2fd41-c2ff-4d48-ad8d-dd5e90461629"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVG_D2} - $F{SUMAVG_D1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="490" y="0" width="100" height="13" uuid="183a1100-8a55-401b-bdf8-064d434a48cc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOST_INP_SUMA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement x="690" y="0" width="100" height="13" uuid="d81ea9a0-1fe0-49cb-b42c-1b54240dc934"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_OP_ACC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="790" y="0" width="100" height="13" uuid="257a83e9-8549-457d-8273-5b618200d792"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOST_OUTP_SUMA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="990" y="0" width="100" height="13" uuid="000847fb-5f7f-4ea3-890f-9a71f3c44771"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OUTP_SUMA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="590" y="0" width="100" height="13" uuid="547dc233-945a-4fb5-a6a2-b972e468f1ee"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOST_INP_SUMAVGEQ_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="890" y="0" width="100" height="13" uuid="6ea657c1-f7e7-4daa-8650-51106f4bad53"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOST_OUTP_SUMAVGEQ_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1090" y="0" width="100" height="13" uuid="aa84cdf6-baa6-4dbd-9d15-bc207e0ff268"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OUTP_SUMAVGEQ_D2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="200" splitType="Stretch">
+			<elementGroup/>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="290" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="b2477861-f2f4-49f1-acfd-f1ec7025f34c"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[В цілому по Банку:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="fef5d953-5ea5-4097-b6d2-07ebbfda1f44"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_D1D1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ee48a50e-9f45-4fb3-8fd9-8155280a5a59"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_D2D2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1190" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="e35c551f-781e-4cd4-93c1-5245b9a331d0"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="1942101e-0534-4c83-9b07-2eddaa95d653"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_Growth}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1390" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="fcf5c3e2-f638-4477-8f61-0640c3b60b6c"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="20" width="290" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="686fd7cb-535f-4705-8e45-d3df6f2b7538"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[в т.ч.грн.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="40" width="290" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="4003e77a-0eef-4c34-ae6c-51547256c1e2"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[дол.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="60" width="290" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ae805614-2bf0-41a5-9015-cc5d15ae07b4"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="80" width="290" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="87c1505b-f277-4f60-9741-3a5a5e133956"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[інші валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="b3596001-19e5-43bf-a35b-4aa9b736e05b"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="328e9ed1-57a6-420e-a706-40e8347a5262"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="4a5d3e46-36ab-4029-a977-999676fc62f7"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="98a19505-1023-4a3b-83b1-2719a6a11fe2"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="8e40a309-b5b7-4b86-a452-0f3e80def607"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="b09cb54e-751e-48d4-9b92-e16000badc11"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D1D1_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="444bd253-1a0f-448f-9a61-ec0ec393c68a"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D1D1_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="095cfadc-1390-4253-83c7-e28f74d99f82"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D1D1_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="6f0d1d91-0767-4aa8-9877-fdf06d94fe81"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D1D1_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="954e3160-54a8-46db-898c-a15e6c8520a3"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1190" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="5be6fff1-c4dd-4c77-ac98-a0a5c4c2d156"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="097b15f6-46fc-47bf-8db1-e951fc7c1bc7"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="9e367d03-e037-4960-8e6f-b6b905a0e299"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ae5ee0d8-8645-4e1d-b2a5-26b05213567d"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="91ad592a-551c-4812-9d81-fb9b4532978c"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="1a1b8edd-e3fc-49ee-9af8-fb712c5b8c48"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="682953af-b13c-4505-9935-11b52d766cd5"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="45c54de5-42ed-4817-aa91-90616e893200"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_978} - $V{All_Summa_D1_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1390" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="77849453-476b-4ae9-b928-da88d702889a"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="69a891ae-4edd-4ba8-a68d-c15c394c17cc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_840} - $V{All_Summa_D1_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="0d0a76ec-601e-4072-865a-87fad7c8e9a2"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_980} - $V{All_Summa_D1_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="0e3c143b-7d6b-4bb4-ba7a-0c383d7413fa"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_978} - $V{All_SummaEq_D1D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="99e3f080-e1b2-4d0b-a253-39b3f31e4a20"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_980} - $V{All_SummaEq_D1D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="24af4d19-673b-40ec-b27a-c9708363642e"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_840} - $V{All_SummaEq_D1D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="5e23c1e9-f863-4577-8cb1-073fc715af6b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_D2D2_Other} - $V{All_SummaEq_D1D2_Other}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="e585ed6a-89f9-4299-8c58-67c7d51133af"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="100" width="290" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="b08a1247-dee9-4e6c-8203-937091726d72"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[Без ГО:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="e05787a7-ea34-4890-a9e7-f11034f3adf8"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="140" width="290" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="35592299-b15d-4aa3-bd88-bbe9bf3a5ef0"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[дол.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="120" width="290" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="9b822bed-a53e-4eb7-b8c3-b00e7d1054bc"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[в т.ч.грн.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="180" width="290" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="457725c5-10cb-44d7-bb33-6ad67daf3620"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[інші валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="160" width="290" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="d8f7a14e-70d2-4edd-8193-19f502b49c42"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="d8fc5cbb-cd26-4830-8ce4-477a923ad09b"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="61fecaa7-9f6a-4bdf-b9ff-151ecdc6915f"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="b9e38b8c-bc83-4da4-abc3-c6d801630b85"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="290" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="00f83373-db8d-4060-a24a-f0be8ccdabb4"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D1_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="c73bda8e-4a3a-4751-b398-a5815e0c0919"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D1D1_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="e6c19c2e-ef68-4e31-b56c-e7e51c3456fb"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D1D1_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="401f42b2-daf9-4bbd-a1c6-ea6754af6bcc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D1D1_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="bf807643-eea6-4137-adae-4277071ee67d"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D1D1_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="390" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="85f1f52e-4072-471e-8753-b34e5d7da9a1"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_D1D1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="0aedf485-66ab-4859-a3df-5a250369ae85"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="8e0c134b-8ad3-4c52-8766-0084a76f3193"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="39a4a128-85ec-4ef4-a79b-2c9f2b034341"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_980}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="0a35c2a6-5fae-4051-8014-efb04c8dc694"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="64e66382-2af3-401f-b28f-8632861a8860"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="f003cb21-46c8-4aac-a1d0-6d13ebe20d0b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="490" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="6b13a530-861c-4291-939f-654364055d38"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="02199823-a5e8-43fd-878e-b198981097ef"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="490" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="1fb3ef94-e516-4255-b5c5-38770a553a41"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Inp_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ccae7120-29c9-4bd3-9d33-fb05029b163b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Inp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="98465a21-c746-48a0-ba5d-6a4d283cf97d"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Inp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="dc2a70b4-355f-44cd-ba5c-9315ead4dca0"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Inp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="99cedc8d-392a-4d21-afab-65ef9a39536e"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Inp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="3c13169b-cd67-4457-b60f-276e17a6ec78"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_Dost_Inp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="03668e2c-4eaa-4d79-a8dd-811047110874"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Inp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="7c8f830d-b0c4-4c94-81e4-44b4e5eff7d2"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Inp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="d8cd4796-1688-4af8-b746-c50f051d3fcc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Inp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="0f3c8c69-f911-4cf5-bb12-6219d95d2294"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_Dost_Inp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="590" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="7be0a626-a745-4a47-a06d-9348dd821239"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Inp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="9865464f-db1f-4a93-bb29-d76b26d5be71"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="246e54d4-10e5-4046-9ca6-0024d96f05f7"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_withoutGO_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="be5fb86c-c22e-47af-8d95-0b9abf8fd71a"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="438f22e1-112b-4e13-bf89-6bb654becd18"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="c8f2a4cd-2fc1-4704-813a-55b8245162ac"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="96927d9f-7b10-40d7-bb2e-2fa9fe21a902"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_Summa_Op_Acc}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="55dce4d5-499d-4e24-9edc-71962a7f942f"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="be882d5a-defe-400d-8963-3f364c47bc1b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="34dacfe2-2dfa-4995-a2ec-c30f6a26466b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_Summa_Op_Acc_withoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement mode="Opaque" x="690" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="f1811cc4-b0dd-4f3c-ae5e-b334e76cee2f"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Op_Acc_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="1c258f1d-4754-4da6-acd2-70859765c792"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="f53f7df6-8954-4284-bc8c-3561b1dd3a00"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="28338ebd-2db3-4fb1-a14c-21943ada0e61"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="3ea88a4e-bb6e-4922-a9ea-5e8f73e9a53f"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_980}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="8da3de8d-51cc-4c98-97c6-4b8ffc73a308"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="4fffa61e-c7d8-406d-8747-17de02cb9ae3"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="ee7dbdca-0573-4ecc-b3ea-f7a16c68d4fc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="790" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="365d02bb-4705-4c68-9373-67adb2319edb"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="0b2b08c7-de21-4b11-b63e-63f8cd0b4dc0"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="790" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="9e056b4c-4e7a-436c-84a2-1579e85fe451"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Dost_Outp_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="49efc161-9030-45a1-9cb6-0d08ee28d892"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="58820bc4-495b-4f47-bbee-afe8bb7ebfdc"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="0" width="100" height="13" forecolor="#FFFFFF" backcolor="#3366FF" uuid="085ad5e7-adee-4b57-8f5c-f74378a7bdc8"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{RC_SummaEq_Dost_Inp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="640b110b-7a19-45c2-a0c8-17768d25aa67"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ce16a293-1254-42dc-922b-d53666caeaea"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="d86ba022-eba6-463e-99a2-fe27da6947c0"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="fdebbf9d-711a-4043-a642-a8b81f61d251"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_Dost_Outp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ea10de1e-dc42-4b52-85c6-1bffea931c46"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="a5734bcc-35f3-4b59-96c1-9dd156d65086"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="2e067b64-d393-4ca3-9b60-def5a3252ad1"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_Dost_Outp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="890" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="4756b5e2-4082-49d3-b04c-c7f222a17ac9"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="1e4bd040-376c-4426-8a14-f5c00b8912ce"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="6e32f7a9-1df9-4f6b-8914-8c98134b4076"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="96267a18-1d82-4b65-a8ae-6be5d327ba02"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="642ad0af-cbc8-4c93-be89-c924ccc8769e"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="ef6bf89e-09d9-4443-bade-f8540a622440"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="cb8b5a26-b0e5-42c4-9047-2554185eaf9a"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="9cbe2ba9-f342-4f5c-9dcf-2cbef84d7bf8"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="9ec3e29a-a60e-4046-b91b-f7f1cea89d09"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="990" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="e00adcb7-c75e-4f54-868a-f0500860886b"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_Outp_978}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="990" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="439ee652-b6c0-42d8-a28c-003544bf2372"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="60" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="97508add-430d-4f70-9347-51cc9b7fbcc3"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="3ed927e2-61b0-46fc-952f-a09163582925"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="40" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="2742f2db-8159-46a4-9504-9051d8228e20"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="1f9ad295-8124-4e3e-8e71-5519c108afb4"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="80" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="96911195-e27a-437f-9731-84c80199ade2"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="20" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="a5b1fbc5-7861-4538-9b2c-b0a9c395cf27"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_Dost_Outp_D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#7F7F7F" uuid="b8a4f2c8-f3eb-49a1-aa5b-72525206a002"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_Dost_Outp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="f4fb0794-0f73-445d-9c1c-8f214576e549"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_Dost_Outp_D2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="b36aa577-c4ea-4736-88fe-5fcafd0cd0ec"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1090" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="f4562ac1-9e40-4e3a-8ec0-185d5b7468fd"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_Dost_Outp_D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="483b24d9-e022-4f7e-af5f-da5219cf48ee"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="2887a19d-4da0-4892-8a1a-f0a4522211e6"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="c4fbcd30-b4af-407f-a3ec-12e512840608"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="aba65eb3-e683-40af-bffc-7659b9bde2f9"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_D2D2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1190" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="0489cab3-4e3b-4694-b436-767ef301b3ce"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1190" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="5bec29de-f96b-47d6-a402-c2520c0a226a"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="22b5778f-7ed0-40f1-8b8b-2abbdad38103"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1290" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="0c7faa49-8b04-4300-bf95-2fd984aa7bdf"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="02cb02b9-33be-4e2a-9884-6a6767369355"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1190" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="10e51123-e6cb-49bb-acfa-595a47a836b7"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="d121ea70-26da-4ee4-9d39-4c9804843c01"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_980} - $V{All_Summa_D1_withoutGO_980}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1390" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="108a6553-b94d-4a65-a36a-1d45f9ea012d"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="5dba0542-b1b4-4aec-8de9-e93fd0ca458e"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_978} - $V{All_SummaEq_withoutGO_D1D2_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="160" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="7c58ce5d-04e3-4e4a-a613-66f6be9eb2a4"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_978} - $V{All_Summa_D1_withoutGO_978}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="180" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="44378e57-9030-43e0-a9c0-35315ab5a0c3"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_Other} - $V{All_SummaEq_withoutGO_D1D2_Other}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="c5e85075-f3ce-4058-929a-cdaba35190c6"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ALL_SummaEq_withoutGO_D2D2} - $V{ALL_SummaEq_withoutGO_D1D2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="1390" y="100" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="d751f2bc-de82-4421-93e2-4c9df4a96147"/>
+				<box leftPadding="4">
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="120" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="364a12c5-c1e3-4be5-8d22-737f124289aa"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_980} - $V{All_SummaEq_withoutGO_D1D2_980}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1390" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="4cafe993-44d0-406e-9104-ed6f798bc11f"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_Summa_D2_withoutGO_840} - $V{All_Summa_D1_withoutGO_840}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement mode="Opaque" x="1490" y="140" width="100" height="20" forecolor="#000000" backcolor="#E5E0EC" uuid="ecb0cda4-8cdc-4f69-b74f-e0d5c270d430"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SummaEq_withoutGO_D2D2_840} - $V{All_SummaEq_withoutGO_D1D2_840}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

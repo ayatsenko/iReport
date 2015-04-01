@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report9" language="groovy" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="1000" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="5a10d3d2-d548-4404-a3de-4ee9d3a33d83">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="5"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<parameter name="start_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Початкова дата]]></parameterDescription>
+	</parameter>
+	<parameter name="end_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Кінцева дата]]></parameterDescription>
+	</parameter>
+	<parameter name="Contragent_No" class="java.lang.String">
+		<parameterDescription><![CDATA[Номер Контрагента]]></parameterDescription>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call FDI_BANK.FDIPKG_REPORTS.REPORT_125($P{start_date},$P{end_date},$P{Contragent_No},$P{ORACLE_REF_CURSOR})}]]>
+	</queryString>
+	<field name="SNAME" class="java.lang.String"/>
+	<field name="ACCOUNTNO" class="java.lang.String"/>
+	<field name="CURRENCYID" class="java.math.BigDecimal"/>
+	<field name="TOTALDAYS" class="java.math.BigDecimal"/>
+	<field name="WORKDAYS" class="java.math.BigDecimal"/>
+	<field name="AVRG_ACT_T" class="java.math.BigDecimal"/>
+	<field name="AVRGEQ_ACT_T" class="java.math.BigDecimal"/>
+	<field name="AVRG_PAS_T" class="java.math.BigDecimal"/>
+	<field name="AVRGEQ_PAS_T" class="java.math.BigDecimal"/>
+	<field name="AVRG_ACT_W" class="java.math.BigDecimal"/>
+	<field name="AVRGEQ_ACT_W" class="java.math.BigDecimal"/>
+	<field name="AVRG_PAS_W" class="java.math.BigDecimal"/>
+	<field name="AVRGEQ_PAS_W" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="1000" height="79" backcolor="#66CCFF" uuid="b395b6b2-dc2c-4bd8-b6ef-3ad1f782c181"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA['Середні залишки по рахункам контрагента '  + $F{SNAME} + ' за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{start_date}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{end_date}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="100" height="60" backcolor="#FFFF33" uuid="cb1166bf-fdd4-4c81-8b94-0ef2a8a4beae"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Номер рахунку]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="100" y="0" width="100" height="60" backcolor="#FFFF33" uuid="0ccb705d-7a5d-485f-aff0-11f438ae6cb7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Код валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="200" y="40" width="100" height="20" backcolor="#FFFF33" uuid="26d444dd-cda5-4e40-90ff-90404ad96d84"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В валюті рахунка]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="300" y="40" width="100" height="20" backcolor="#FFFF33" uuid="068df580-0f41-489a-b1d3-340d8a42168d"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В грн еквіваленті]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="400" y="40" width="100" height="20" backcolor="#FFFF33" uuid="b995f55f-6c7f-4543-b36f-39367c13dd5a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В валюті рахунка]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="500" y="40" width="100" height="20" backcolor="#FFFF33" uuid="7159e330-9965-49c5-bc39-d876bbfda4a9"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В грн еквіваленті]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="600" y="40" width="100" height="20" backcolor="#FFFF33" uuid="542e091d-4102-4d92-b9d4-6c2a68546ab2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В валюті рахунка]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="700" y="40" width="100" height="20" backcolor="#FFFF33" uuid="c55b5503-8938-457b-896e-1ea3436239ec"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В грн еквіваленті]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="800" y="40" width="100" height="20" backcolor="#FFFF33" uuid="8dc9ee4d-b702-455d-a05d-50722eedc43f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В валюті рахунка]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="900" y="40" width="100" height="20" backcolor="#FFFF33" uuid="90a42487-409b-4a62-91f3-55c8d047af2c"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[В грн еквіваленті]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="200" y="0" width="400" height="20" backcolor="#FFFF33" uuid="b5ffc44a-8e59-49f9-82bf-b1977b382997"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA['Середні залишки за '+ $F{TOTALDAYS} +' календарних днів']]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="600" y="0" width="400" height="20" backcolor="#FFFF33" uuid="a98728e6-87ef-4865-bc97-8f0498a8f237"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA['Середні залишки за ' + $F{WORKDAYS} + ' робочіх днів']]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="200" y="20" width="200" height="20" backcolor="#FFFF33" uuid="5395d1b6-04a1-4627-bd1b-7b50d27149ea"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<text><![CDATA[По активним залишкам]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="400" y="20" width="200" height="20" backcolor="#FFFF33" uuid="cda665f7-a256-408e-8fa7-cae378167fac"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<text><![CDATA[По пасивним залишкам]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="600" y="20" width="200" height="20" backcolor="#FFFF33" uuid="3331b6b6-857d-42ed-ac11-8b5f15ad00db"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<text><![CDATA[По активним залишкам]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="800" y="20" width="200" height="20" backcolor="#FFFF33" uuid="5291f98f-041d-4572-8199-d94f0553c5ac"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<text><![CDATA[По пасивним залишкам]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20" uuid="ec7f533b-5879-486e-add3-067090439fc7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNTNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="20" uuid="d6fdd70c-52ae-4bd2-8942-619ee5d7b0f0"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENCYID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="200" y="0" width="100" height="20" uuid="922d9657-255b-4a2a-8416-14d4e1d72dd3"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRG_ACT_T}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="300" y="0" width="100" height="20" uuid="906222f6-1342-48cc-a4f7-8fe660c28068"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRGEQ_ACT_T}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="400" y="0" width="100" height="20" uuid="be37e2e2-9ca2-43f6-bdd1-58ab6129ff0a"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRG_PAS_T}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="500" y="0" width="100" height="20" uuid="a2183d40-4569-4c22-9c36-1a8b1e2a69b9"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRGEQ_PAS_T}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="600" y="0" width="100" height="20" uuid="10fdadc8-fb4a-4c19-a71d-6532655ecc42"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRG_ACT_W}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="700" y="0" width="100" height="20" uuid="c892f8af-b11b-42ac-8e95-ab5f250f6079"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRGEQ_ACT_W}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="800" y="0" width="100" height="20" uuid="8d5a335d-5efa-4455-bdf9-700d2243cb68"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRG_PAS_W}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="900" y="0" width="100" height="20" uuid="cc09dbad-4cc3-41c6-90a7-8dbbb3a144df"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVRGEQ_PAS_W}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

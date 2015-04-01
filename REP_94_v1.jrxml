@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report3" language="groovy" pageWidth="750" pageHeight="595" orientation="Landscape" columnWidth="750" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="f61eb6ed-8b70-4c3e-9afa-37d343c45e84">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="start_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Начальная дата]]></parameterDescription>
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="end_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Конечная дата]]></parameterDescription>
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select  arcdate,DOCSEQUENCEID,
+max(kas_doc) kas_doc,
+sum(kas_sum) kas_sum,
+sum(rasch_pf) rasch_pf,
+sum(pf_doc) pf_doc,
+sum(pf_sum) pf_sum,
+sum(currencyid) currencyid,
+sum(sum_val) sum_val
+from
+(
+(select  ard.arcdate,ARD.DOCSEQUENCEID, ARD.DOCUMENTNO kas_doc,ARD.SUMMA/100 kas_sum,ARD.SUMMA*0.5/10000 rasch_pf, null pf_doc,0 pf_sum,null currencyid,0 sum_val
+from creator.arc_document ard
+where substr(ARD.ACCOUNTANO,1,3)=100
+and substr(ARD.ACCOUNTBNO,1,4)=3801
+and ARD.DOCSEQUENCEID is not null
+and ARD.ARCDATE between $P{start_date} and $P{end_date})
+union all
+(select  ard.arcdate,ARD.DOCSEQUENCEID, null kas_doc,0,0,ard.documentno pf_doc,ard.summa/100 pf_sum,null,0
+from creator.arc_document ard
+where substr(ARD.ACCOUNTANO,1,3)=100
+and ARD.ACCOUNTBNO=29028049000001
+and ARD.DOCSEQUENCEID is not null
+and ARD.ARCDATE between $P{start_date} and $P{end_date})
+union all
+(select  ard.arcdate,ARD.DOCSEQUENCEID, null kas_doc,0,0,null,0,ARD.CURRENCYID,ARD.SUMMA/100 sum_val
+from creator.arc_document ard
+where substr(ARD.ACCOUNTANO,1,4)=3800
+and substr(ARD.ACCOUNTBNO,1,3)=100
+and ARD.DOCSEQUENCEID is not null
+and ARD.ARCDATE between $P{start_date} and $P{end_date})
+)
+group by ARCDATE,DOCSEQUENCEID
+order by ARCDATE,currencyid]]>
+	</queryString>
+	<field name="ARCDATE" class="java.sql.Timestamp"/>
+	<field name="DOCSEQUENCEID" class="java.math.BigDecimal"/>
+	<field name="KAS_DOC" class="java.lang.String"/>
+	<field name="KAS_SUM" class="java.math.BigDecimal"/>
+	<field name="RASCH_PF" class="java.math.BigDecimal"/>
+	<field name="PF_DOC" class="java.math.BigDecimal"/>
+	<field name="PF_SUM" class="java.math.BigDecimal"/>
+	<field name="CURRENCYID" class="java.math.BigDecimal"/>
+	<field name="SUM_VAL" class="java.math.BigDecimal"/>
+	<title>
+		<band height="100" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="750" height="60" backcolor="#66CCFF" uuid="586fea06-1967-4468-b7ed-93dc6a3c53e1"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="SansSerif" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Збори до ПФ по операціям з продажу готівкової валюти ПАТ "РАДИКАЛ БАНК" за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{start_date}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{end_date}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="221" y="60" width="80" height="40" backcolor="#FFFF00" uuid="40848a03-85d4-49f3-9334-508f4ab5225c"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Код валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="301" y="60" width="116" height="40" backcolor="#FFFF00" uuid="f82d5d8b-be6a-4ada-8d71-fc0201628f5a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="417" y="60" width="123" height="40" backcolor="#FFFF00" uuid="c70400d5-cad2-4672-84b2-fec55386c279"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Гривневий еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="540" y="60" width="102" height="40" backcolor="#FFFF00" uuid="26d8bea7-a16f-48ad-a55c-4cf930927a6b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Номер документа до ПФ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="642" y="60" width="108" height="40" backcolor="#FFFF00" uuid="544da5f8-f04c-4456-9df4-f61f1804ae46"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума нарахованого внеску до ПФ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="60" width="121" height="40" backcolor="#FFFF00" uuid="40d5c6b5-55ff-4c5c-bd62-acfdd8262cf9"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Дата документа]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="121" y="60" width="100" height="40" backcolor="#FFFF00" uuid="3070c76a-2963-40a3-92d4-541ab4f1ac85"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Номер документа]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField pattern="dd.MM.yyyy">
+				<reportElement x="0" y="0" width="121" height="21" uuid="a8df1ccc-6758-4cb0-8d30-2d4c3966b4e6"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ARCDATE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="121" y="0" width="100" height="21" uuid="4313a92c-e5f9-4d3d-a496-0fd3718a6871"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{KAS_DOC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="221" y="0" width="80" height="21" uuid="9e642b29-ac11-4d26-8a7f-dcc95bc5e45f"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENCYID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00">
+				<reportElement x="301" y="0" width="116" height="21" uuid="ecf3cb8a-1160-4373-8cbd-83992e098ba6"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM_VAL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00">
+				<reportElement x="417" y="0" width="123" height="21" uuid="317e14c6-8d6a-48f7-a90f-5f9421694c95"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{KAS_SUM}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="540" y="0" width="102" height="21" uuid="26d881f7-390f-41f4-b512-bd98fb98f1a3"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PF_DOC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00">
+				<reportElement x="642" y="0" width="108" height="21" uuid="ef3f69f8-88fb-46be-80b8-b5355bb7bf4c"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PF_SUM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

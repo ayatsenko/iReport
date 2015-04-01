@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" language="groovy" pageWidth="1060" pageHeight="595" orientation="Landscape" columnWidth="1060" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="5727b514-5c58-45bc-a814-cf5ebf5acb84">
+	<property name="ireport.zoom" value="0.9090909090909162"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Datestart" class="java.util.Date">
+		<parameterDescription><![CDATA[Дата]]></parameterDescription>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Dateend" class="java.util.Date">
+		<parameterDescription><![CDATA[Конец периода]]></parameterDescription>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select * from
+(SELECT
+         a.toboid,
+         tobo.sname tobosname,
+         A.CONTRAGENTID,
+         C.SNAME contragentsname,
+         A.DATEOPEN DATEOPEN,
+         A.DATECLOSE DATECLOSE,
+         C.IDENTIFYCODE contragentidentifycode,
+         cadd.addparamvalue partner,
+         a.BACCOUNTID,
+         a.accountno,
+         a.currencyid symbolcode,
+       round(((sum(FDI_BANK.EXTCONNECTORS.fn_getCBAccountMaskBalance(arcdate, a.toboid,a.currencyid,FDI_BANK.ACCOUNTMASK(A.ACCOUNTNO),2))
+         -
+         sum(FDI_BANK.EXTCONNECTORS.fn_getCBAccountMaskDeal(361,arcdate, a.toboid,a.currencyid,FDI_BANK.ACCOUNTMASK(A.ACCOUNTNO))))
+         /(
+              (case
+              when (a.DATECLOSE >= $P{Dateend}) then $P{Dateend}
+              when (a.DATECLOSE < $P{Dateend}) then a.DATECLOSE
+              when a.DATECLOSE is null then $P{Dateend}
+              else $P{Dateend}
+            end )
+            -
+            (case
+              when (a.DATEOPEN < $P{Datestart}) then $P{Datestart}
+              when (a.DATEOPEN >= $P{Datestart}) then nvl((select min(ab1.arcdate) from creator.arc_balance ab1 where ab1.accountid=ab.accountid),a.DATEOPEN)
+              else $P{Datestart}
+            end )
+          +1))/100,2) sumavg,
+         round(((sum(FDI_BANK.EXTCONNECTORS.FN_GETEQ(arcdate,a.currencyid,(FDI_BANK.EXTCONNECTORS.fn_getCBAccountMaskBalance(arcdate, a.toboid,a.currencyid,FDI_BANK.ACCOUNTMASK(A.ACCOUNTNO),2))))
+         -
+         sum(FDI_BANK.EXTCONNECTORS.FN_GETEQ(arcdate,a.currencyid,(FDI_BANK.EXTCONNECTORS.fn_getCBAccountMaskDeal(361,arcdate, a.toboid,a.currencyid,FDI_BANK.ACCOUNTMASK(A.ACCOUNTNO))))))
+         /(
+            (case
+              when (a.DATECLOSE >= $P{Dateend}) then $P{Dateend}
+              when (a.DATECLOSE < $P{Dateend}) then a.DATECLOSE
+              when a.DATECLOSE is null then $P{Dateend}
+              else $P{Dateend}
+            end )
+            -
+            (case
+              when (a.DATEOPEN < $P{Datestart}) then $P{Datestart}
+              when (a.DATEOPEN >= $P{Datestart}) then nvl((select min(ab1.arcdate) from creator.arc_balance ab1 where ab1.accountid=ab.accountid),a.DATEOPEN)
+              else $P{Datestart}
+            end )
+         +1))/100,2) sumavgeq
+    FROM creator.arc_balance ab,
+         creator.aaccount a,
+         creator.contragent c,
+         creator.contragentaddparam cadd,
+         creator.ContragentTypeField vctf,
+         creator.tobo
+   WHERE     arcdate >= $P{Datestart}
+         AND arcdate <= $P{Dateend}
+         AND AB.ACCOUNTID = A.ID
+         AND (SUBSTR (A.ACCOUNTNO, 1, 4) IN  (select SUBSTR (ACCOUNTMASK,1,4) from table(select fdi_bank.FDIPKG_UTIL.varchar2ACCOUNTMASK_Array((select trim(CSR_VALUE)  FROM FDI_BANK.VCUSTOMERSETTINS_CURRENT where cs_id=83)) from dual)) or
+         SUBSTR (A.ACCOUNTNO, 1, 4) IN  (select SUBSTR (ACCOUNTMASK,1,4) from table(select fdi_bank.FDIPKG_UTIL.varchar2ACCOUNTMASK_Array((select trim(CSR_VALUE)  FROM FDI_BANK.VCUSTOMERSETTINS_CURRENT where cs_id=146)) from dual)))
+         AND C.ID = A.CONTRAGENTID
+         AND CADD.ID = C.ID
+         AND CADD.CONTRAGENTTYPEID = C.CONTRAGENTTYPEID
+         AND VCTF.CONTRAGENTTYPEID = C.CONTRAGENTTYPEID
+         AND VCTF.LABEL = 'Источник'
+         AND CADD.CONTRAGENTTYPEFIELDID = VCTF.ID
+         AND TOBO.ID = A.TOBOID
+         AND ((A.DATECLOSE is null) or (A.DATECLOSE >= $P{Datestart}))
+GROUP BY A.CONTRAGENTID,
+         C.SNAME,
+         a.DATEOPEN,
+         A.DATECLOSE,
+         C.IDENTIFYCODE,
+         cadd.addparamvalue,
+         a.toboid,
+         tobo.sname,
+         A.BACCOUNTID,
+         a.accountno,
+         a.currencyid,
+         ab.accountid)
+where
+sumavgeq <> 0
+ORDER BY DECODE(trim(translate(partner, '0123456789', '          ')),null,to_number(partner),ORA_HASH(partner)), abs(sumavgeq) desc]]>
+	</queryString>
+	<field name="TOBOID" class="java.math.BigDecimal"/>
+	<field name="TOBOSNAME" class="java.lang.String"/>
+	<field name="CONTRAGENTID" class="java.math.BigDecimal"/>
+	<field name="CONTRAGENTSNAME" class="java.lang.String"/>
+	<field name="DATEOPEN" class="java.sql.Timestamp"/>
+	<field name="DATECLOSE" class="java.sql.Timestamp"/>
+	<field name="CONTRAGENTIDENTIFYCODE" class="java.lang.String"/>
+	<field name="PARTNER" class="java.lang.String"/>
+	<field name="BACCOUNTID" class="java.math.BigDecimal"/>
+	<field name="ACCOUNTNO" class="java.lang.String"/>
+	<field name="SYMBOLCODE" class="java.math.BigDecimal"/>
+	<field name="SUMAVG" class="java.math.BigDecimal"/>
+	<field name="SUMAVGEQ" class="java.math.BigDecimal"/>
+	<variable name="Partner_SumaEQ" class="java.math.BigDecimal" resetType="Group" resetGroup="Partner_Group" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ}]]></variableExpression>
+	</variable>
+	<variable name="All_SumaEQ" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUMAVGEQ}]]></variableExpression>
+	</variable>
+	<group name="Partner_Group">
+		<groupExpression><![CDATA[$F{PARTNER}]]></groupExpression>
+		<groupFooter>
+			<band height="20">
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="968" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b2477861-f2f4-49f1-acfd-f1ec7025f34c"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+						<paragraph lineSpacing="1_1_2"/>
+					</textElement>
+					<text><![CDATA[Всього по партнеру:]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement x="968" y="0" width="92" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Partner_SumaEQ}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="386" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b2477861-f2f4-49f1-acfd-f1ec7025f34c"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[Звіт по залишкам на поточних рахунках Юр. осіб за період з:]]></text>
+			</staticText>
+			<textField pattern="dd.MM.yyyy">
+				<reportElement mode="Opaque" x="386" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="d596d7b5-c7be-47d8-bc2f-faffee98e4b8"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Datestart}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="526" y="20" width="90" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Інд. код.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="616" y="20" width="50" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Партнер]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="738" y="20" width="100" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Рахунок]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="838" y="20" width="50" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Валюта]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="888" y="20" width="80" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Сума]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="968" y="20" width="92" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Еквівалент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="616" y="0" width="444" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b2477861-f2f4-49f1-acfd-f1ec7025f34c"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="20" width="29" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Код відділ.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="169" y="20" width="29" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Код контр.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="386" y="20" width="70" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Дата відкр.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="456" y="20" width="70" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Дата закр.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="198" y="20" width="188" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Контрагент]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="29" y="20" width="140" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Відділення]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="666" y="20" width="72" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="33f8f9e2-3cb8-4bdb-a1b4-cd15239255ba"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="false" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+				</textElement>
+				<text><![CDATA[Бал. Рах]]></text>
+			</staticText>
+			<textField pattern="dd.MM.yyyy">
+				<reportElement mode="Opaque" x="526" y="0" width="90" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="ec83a72d-43b6-43b8-b9b6-762cd084de2a"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Dateend}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="456" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="f4be0b18-fa60-4842-8b14-64163713cf3c"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[по:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<elementGroup/>
+			<elementGroup>
+				<textField>
+					<reportElement x="29" y="0" width="140" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{TOBOSNAME}]]></textFieldExpression>
+				</textField>
+			</elementGroup>
+			<textField>
+				<reportElement x="0" y="0" width="29" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOBOID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="198" y="0" width="188" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTSNAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="169" y="0" width="29" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTID}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
+				<reportElement x="386" y="0" width="70" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEOPEN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
+				<reportElement x="456" y="0" width="70" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATECLOSE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="526" y="0" width="90" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTIDENTIFYCODE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="616" y="0" width="50" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PARTNER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="738" y="0" width="100" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNTNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="838" y="0" width="50" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SYMBOLCODE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="888" y="0" width="80" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVG}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="968" y="0" width="92" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUMAVGEQ}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="666" y="0" width="72" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BACCOUNTID}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="20" splitType="Stretch">
+			<elementGroup/>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="968" height="20" forecolor="#FFFFFF" backcolor="#3399FF" uuid="b2477861-f2f4-49f1-acfd-f1ec7025f34c"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true" pdfFontName="&lt;Different Values&gt;" pdfEncoding="Cp1251"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[Всього:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="968" y="0" width="92" height="20" uuid="8fc22223-41e4-4af6-a969-c090da16e802"/>
+				<box rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{All_SumaEQ}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

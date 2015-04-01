@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Depozit" language="groovy" pageWidth="750" pageHeight="595" orientation="Landscape" columnWidth="750" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="3a59c0d2-4e28-4ef8-8cd1-de97732db426">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<parameter name="start_date" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="end_date" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select branch_id, branch_name,
+        sum(DAY1_SUMMA),
+        sum(DAY31_SUMMA),
+        sum(SUM_DOST_INP),
+        sum(COUNT_OP_ACC),
+        sum(SUM_DOST_OUTP),
+        sum(SUM_OUTP),
+        sum(DAY31_SUMMA)- sum(DAY1_SUMMA) REZ
+    from (
+        (   -- Остаток на начало периода
+	select branch_id,branch_name,sum(round(FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{end_date},currency_id,(fdi_bank.FDIPKG_PLANFACT.fn_getDayDepoPortPhP($P{start_date}-1,branch_id,currency_id).summa))/100,2)) DAY1_SUMMA,0 SUM_DOST_INP,0,0 COUNT_OP_ACC,0 SUM_DOST_OUTP,0 SUM_OUTP,0 DAY31_SUMMA
+            from fdi_bank.branch,fdi_bank.currency
+            where currency_id in (980,978,840,643)
+            and branch_id<>0
+        group by branch_id,branch_name)
+union all
+        (-- Привлечено за период
+	select branch_id, branch_name,0,
+                  round(sum((FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{end_date},CDT.CURRENCYID, CDT.SUMMA))/100),2) SUM_DOST_INP,0,0,0,0,0
+            from creator.arc_document cdt, CREATOR.USERS cus,CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd, fdi_bank.branch
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=1
+            AND CDT.ARCDATE >= $P{start_date}
+            AND CDT.ARCDATE <= $P{end_date}
+            AND CUS.USERNAME=CDT.USERNAME
+            AND CUS.TOBOID=BRANCH.BRANCH_ID
+            AND CDT.CURRENCYID in (978,840,980,643)
+        group by branch_id,branch_name)
+union all
+        (--открыто счетов за период
+	select branch_id, branch_name,0,0,0,
+                sum(fdi_bank.FDIPKG_PLANFACT.fn_getDepoAccOpenPhP($P{start_date}, $P{end_date} ,branch_id,currency_id)) COUNT_OP_ACC,0,0,0
+            from fdi_bank.branch,fdi_bank.currency
+            where currency_id in (980,978,840,643)
+            and branch_id<>0
+            group by branch_id,branch_name)
+union all
+        (-- Досрочное расторжение
+	select branch_id, branch_name,0,0,0,0,
+               round(sum((FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{end_date},CDT.CURRENCYID, CDT.SUMMA))/100),2) SUM_DOST_OUTP,0,0
+            from creator.arc_document cdt, CREATOR.USERS cus,CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd, fdi_bank.branch
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=2
+            AND CDT.ARCDATE >= $P{start_date}
+            AND CDT.ARCDATE <= $P{end_date}
+            AND CUS.USERNAME=CDT.USERNAME
+            AND CUS.TOBOID=BRANCH.BRANCH_ID
+            AND CDT.CURRENCYID in (978,840,980,643)
+            AND CDDT.ARCDATE<CD.MATURITYDATE
+        group by branch_id,branch_name)
+union all
+        (--Всего возврат за период
+	select branch_id, branch_name,0,0,0,0,0,
+                round(sum((FDI_BANK.FDIPKG_PLANFACT.fn_getEQ($P{end_date},CDT.CURRENCYID, CDT.SUMMA))/100),2) SUM_OUTP,0
+            from creator.arc_document cdt, CREATOR.USERS cus,CREATOR.DEALDOCTRANSACTION cddt, creator.individualdeposit cd, fdi_bank.branch
+            where CDT.ID=CDDT.DOCUMENTID
+            and CDDT.DEALID=CD.DEALID
+            and CDDT.DEALDOCUMENTTYPEID=2
+            AND CDT.ARCDATE >= $P{start_date}
+            AND CDT.ARCDATE <= $P{end_date}
+            AND CUS.USERNAME=CDT.USERNAME
+            AND CUS.TOBOID=BRANCH.BRANCH_ID
+            AND CDT.CURRENCYID in (978,840,980,643)
+        group by branch_id,branch_name)
+union all
+        (-- Остаток на конец периода 
+	select branch_id, branch_name,0,0,0,0,0,0,
+                sum(round(fdi_bank.FDIPKG_PLANFACT.fn_getDayDepoPortPhP($P{end_date},branch_id,currency_id).summaeq/100,2)) DAY31_SUMMA
+            from fdi_bank.branch,fdi_bank.currency
+            where currency_id in (980,978,840,643)
+            and branch_id<>0
+        group by branch_id,branch_name)
+)
+group by branch_id, branch_name
+order by branch_id]]>
+	</queryString>
+	<field name="BRANCH_ID" class="java.math.BigDecimal"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="SUM(DAY1_SUMMA)" class="java.math.BigDecimal"/>
+	<field name="SUM(DAY31_SUMMA)" class="java.math.BigDecimal"/>
+	<field name="SUM(SUM_DOST_INP)" class="java.math.BigDecimal"/>
+	<field name="SUM(COUNT_OP_ACC)" class="java.math.BigDecimal"/>
+	<field name="SUM(SUM_DOST_OUTP)" class="java.math.BigDecimal"/>
+	<field name="SUM(SUM_OUTP)" class="java.math.BigDecimal"/>
+	<field name="REZ" class="java.math.BigDecimal"/>
+	<variable name="sum_inp_day" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(DAY1_SUMMA)}]]></variableExpression>
+	</variable>
+	<variable name="sum_inp_day_withoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1 ) ? $F{SUM(DAY1_SUMMA)} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Input_summ" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(SUM_DOST_INP)}]]></variableExpression>
+	</variable>
+	<variable name="All_open_ACC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(COUNT_OP_ACC)}]]></variableExpression>
+	</variable>
+	<variable name="All_Dost_OUT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(SUM_DOST_OUTP)}]]></variableExpression>
+	</variable>
+	<variable name="ALL_OUTP" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(SUM_OUTP)}]]></variableExpression>
+	</variable>
+	<variable name="All_REZ" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{REZ}]]></variableExpression>
+	</variable>
+	<variable name="Input_Sum_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1 ) ? $F{SUM(SUM_DOST_INP)} : 0)]]></variableExpression>
+	</variable>
+	<variable name="Open_ACC_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1) ? $F{SUM(COUNT_OP_ACC)}:0)]]></variableExpression>
+	</variable>
+	<variable name="All_Sum_dost_out_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1 ) ? $F{SUM(SUM_DOST_OUTP)} : 0)]]></variableExpression>
+	</variable>
+	<variable name="All_Sum_out_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1) ? $F{SUM(SUM_OUTP)}:0)]]></variableExpression>
+	</variable>
+	<variable name="REZ_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1) ?$F{REZ}:0)]]></variableExpression>
+	</variable>
+	<variable name="Sum_end_term" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(DAY31_SUMMA)}]]></variableExpression>
+	</variable>
+	<variable name="Sum_end_term_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1)? $F{SUM(DAY31_SUMMA)}:0)]]></variableExpression>
+	</variable>
+	<variable name="All_Input_Summ_WithoutGO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(($F{BRANCH_ID}!=1) ? $F{SUM(SUM_DOST_INP)}:0)]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="99" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="750" height="44" uuid="c0a7ceec-b2d3-46d9-b2a5-ac698c81c603"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA['Виконання планів  по залученню пасивів відділеннями ПАТ "РАДИКАЛ БАНК" за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{start_date}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{end_date}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="44" width="161" height="55" uuid="04dc4b24-4036-417f-a06e-cb8a428acaf1"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Відділення]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="161" y="44" width="87" height="55" uuid="d30b6979-15af-443a-91f7-f2c3120d2061"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Залишок на початок дня]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="248" y="44" width="89" height="55" uuid="a62541ed-d268-4e8b-bcb5-1fd5ce6e23a2"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Операції по залученню вкладів за період]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="44" width="55" height="55" uuid="1838308a-4d86-4822-abe6-508ee5e7becd"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Відкрито депозитних рахунків]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="392" y="44" width="85" height="55" uuid="f2fdd1c0-2430-45f8-be13-f0bc2b428c3c"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Дострокове зняття вкладів]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="477" y="44" width="85" height="55" uuid="da86f5a7-e18c-4e13-8890-f4c69f6ef48f"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Видаткові операції по вкладам за період]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="662" y="44" width="88" height="55" uuid="b7e958a4-e12e-4f1f-b98f-3e00a58e359f"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Результат]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="562" y="44" width="100" height="55" uuid="d0c1e659-f52f-4593-8534-b600420dd073"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Залишок на кінець дня]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="161" height="25" uuid="4ecab715-4ed3-43b1-959c-5f45e379d20c"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="161" y="0" width="87" height="25" isPrintInFirstWholeBand="true" uuid="1945c27f-9906-4b53-8e74-5741c45e199f"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(DAY1_SUMMA)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="248" y="0" width="89" height="25" isPrintInFirstWholeBand="true" uuid="eba20c94-0d61-446b-b06c-73d225fac31c"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(SUM_DOST_INP)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="337" y="0" width="55" height="25" uuid="0496a516-8eb8-43b3-9668-82ba8a430661"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(COUNT_OP_ACC)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="392" y="0" width="85" height="25" isPrintInFirstWholeBand="true" uuid="bc4a6224-c837-4e7e-a62d-6ff676969ce6"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(SUM_DOST_OUTP)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="477" y="0" width="85" height="25" isPrintInFirstWholeBand="true" uuid="6b8cf2a1-a7d0-4322-a4f1-20cba15e2fa5"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(SUM_OUTP)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="662" y="0" width="88" height="25" isPrintInFirstWholeBand="true" uuid="e78888b4-b81b-4b23-a4f6-ef7903ef516d"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{REZ}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="562" y="0" width="100" height="25" isPrintInFirstWholeBand="true" uuid="d2323c91-e48a-46e8-9267-2570e5d5027d"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUM(DAY31_SUMMA)}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="51" splitType="Stretch">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="161" y="0" width="87" height="25" isPrintInFirstWholeBand="true" uuid="faacdedf-237b-4832-a0db-21b50a76c213"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{sum_inp_day}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="161" y="25" width="87" height="25" isPrintInFirstWholeBand="true" uuid="003161bc-7cd1-43bf-af91-4c90c20b6125"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{sum_inp_day_withoutGO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="161" height="25" uuid="622038eb-52c6-4adc-ae93-5fc823b290fb"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Всього]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="25" width="161" height="25" uuid="0c5463b9-c8ac-4335-bbdc-175d8a0f4cc9"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Всього без ГО]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="248" y="0" width="89" height="25" isPrintInFirstWholeBand="true" uuid="d9afd592-1d11-4100-ac40-d7aec0c171ac"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_Input_summ}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="337" y="0" width="55" height="25" uuid="37ef0d56-2b05-48c7-b102-a15e6872a05c"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_open_ACC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="392" y="0" width="85" height="25" isPrintInFirstWholeBand="true" uuid="6d35b89a-ea18-4a19-8e82-5a5b705b6214"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_Dost_OUT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="477" y="0" width="85" height="25" isPrintInFirstWholeBand="true" uuid="e2263a24-1079-4a67-ab93-f295fc4a9aa0"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{ALL_OUTP}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="662" y="0" width="88" height="25" isPrintInFirstWholeBand="true" uuid="6a2dc675-d57c-4bfc-a547-e64326bb60f2"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_REZ}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="248" y="25" width="89" height="25" isPrintInFirstWholeBand="true" uuid="7b203ba6-a9b6-4ca8-94e9-55c6569fd377"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{Input_Sum_WithoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="337" y="25" width="55" height="25" uuid="441998d0-81c6-41ce-926c-258d87f96ab0"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{Open_ACC_WithoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="392" y="25" width="85" height="25" isPrintInFirstWholeBand="true" uuid="65262518-15b4-462a-9cf7-bb91be294590"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_Sum_dost_out_WithoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="477" y="25" width="85" height="25" isPrintInFirstWholeBand="true" uuid="b240fedb-7428-4f51-ab8f-696fdfeb49e9"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_Sum_out_WithoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="662" y="25" width="88" height="25" isPrintInFirstWholeBand="true" uuid="d029a276-ec97-4ee9-be17-5ee96e6a691a"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{REZ_WithoutGO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="562" y="0" width="100" height="25" isPrintInFirstWholeBand="true" uuid="ea4ee333-8f8c-4b44-b047-496d72316002"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{Sum_end_term}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="562" y="25" width="100" height="25" isPrintInFirstWholeBand="true" uuid="3bfd4f36-13cc-4201-89fb-c635260ab4df"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{Sum_end_term_WithoutGO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

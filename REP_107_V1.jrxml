@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report5" language="groovy" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="e2899862-bbf4-47fc-8c5e-8f77a83410ec">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<parameter name="start_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Початкова дата звіту]]></parameterDescription>
+	</parameter>
+	<parameter name="end_date" class="java.util.Date">
+		<parameterDescription><![CDATA[Кінцева дата звіту]]></parameterDescription>
+	</parameter>
+	<queryString>
+		<![CDATA[select dl.CLEAROFFDATE, OPENEDINTOBOID, d.CONTRAGENTID, C.SNAME ,dl.FEETOTAL/100 FEETOTAL
+from creator.DealCliForex dl, creator.deal d, creator.contragent c
+where DL.DEALID=D.ID
+  and C.ID=D.CONTRAGENTID
+  and dl.CLEAROFFDATE>=$P{start_date}
+  and dl.CLEAROFFDATE<=$P{end_date}
+  order by OPENEDINTOBOID,dl.CLEAROFFDATE,feetotal,d.CONTRAGENTID]]>
+	</queryString>
+	<field name="CLEAROFFDATE" class="java.sql.Timestamp"/>
+	<field name="OPENEDINTOBOID" class="java.math.BigDecimal"/>
+	<field name="CONTRAGENTID" class="java.math.BigDecimal"/>
+	<field name="SNAME" class="java.lang.String"/>
+	<field name="FEETOTAL" class="java.math.BigDecimal"/>
+	<variable name="Itogo" class="java.lang.String" resetType="Group" resetGroup="TOBO" calculation="Sum"/>
+	<variable name="Sum_TOBO" class="java.math.BigDecimal" resetType="Group" resetGroup="TOBO" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEETOTAL}]]></variableExpression>
+	</variable>
+	<group name="TOBO">
+		<groupExpression><![CDATA[$F{OPENEDINTOBOID}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="595" height="20" forecolor="#FFFFFF" backcolor="#CCCCCC" uuid="4c75b82f-6f6f-4fba-bbd6-781613f450e8">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Body"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA['ТВБВ №'+ ($F{OPENEDINTOBOID})]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField pattern="###0.00;-###0.00">
+					<reportElement x="495" y="0" width="100" height="20" uuid="8a4b28b2-e727-4880-b8ff-1217a773ba9a"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{Sum_TOBO}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="495" height="20" forecolor="#000000" backcolor="#99FFCC" uuid="0d0d9c35-fdf9-4218-8b20-de6e2b2edbf2">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Всього по ТВБВ №'+ ($F{OPENEDINTOBOID})]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="65" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="595" height="45" backcolor="#66CCFF" uuid="6fe193a7-c9fc-4267-8526-b5e035fd1e35"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none"/>
+				<textFieldExpression><![CDATA['Звіт фінансового аналізу по сумі валютних комісій в розрізі відділень ПАТ "РАДИКАЛ БАНК" за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{start_date}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{end_date}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="45" width="100" height="20" backcolor="#FFFF33" uuid="f9f7a82c-b35f-4069-8451-c9ca71fd50d6"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Дата розрахунку]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="100" y="45" width="58" height="20" backcolor="#FFFF33" uuid="4d8d139b-20bf-4acb-b0b4-7b35bbbe63a7"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[№ ТВБВ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="158" y="45" width="58" height="20" backcolor="#FFFF33" uuid="8db40a4a-3f7c-49c2-88d7-288dc55c7387"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[№ К/А]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="216" y="45" width="279" height="20" backcolor="#FFFF33" uuid="92c68dce-777a-43ae-ae3f-66ea04b65e91"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Назва К/А]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="495" y="45" width="100" height="20" backcolor="#FFFF33" uuid="813a3081-10e3-4966-976d-f53dafd7a605"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Комісія]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField pattern="dd.MM.yyyy">
+				<reportElement x="0" y="0" width="100" height="20" uuid="fc2a8701-83cf-4591-ae21-c345d123e5cc"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CLEAROFFDATE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="58" height="20" uuid="d0bc4e65-4116-4d12-97b2-7ca0cb84417a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OPENEDINTOBOID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="158" y="0" width="58" height="20" uuid="6bade328-4a72-4785-bcc5-1473f1b59995"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="216" y="0" width="279" height="20" uuid="a515e60c-1a63-40d8-b40f-53d46c02d0cb"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00">
+				<reportElement x="495" y="0" width="100" height="20" uuid="4d29527c-e310-4173-8b33-3944bee8fbee"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{FEETOTAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

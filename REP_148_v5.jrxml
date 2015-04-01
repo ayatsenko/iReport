@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report14" language="groovy" pageWidth="1600" pageHeight="595" orientation="Landscape" columnWidth="1600" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="0099fcf8-1d86-4cbf-9904-ffa527b4814d">
+	<property name="ireport.zoom" value="0.75"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<parameter name="date_zvit" class="java.util.Date">
+		<parameterDescription><![CDATA[Дата звіту]]></parameterDescription>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call FDI_BANK.FDIPKG_REPORTS.REPORT_148($P{date_zvit},$P{ORACLE_REF_CURSOR})}]]>
+	</queryString>
+	<field name="CONTRAGENTID" class="java.math.BigDecimal"/>
+	<field name="CONTRAGENTNAME" class="java.lang.String"/>
+	<field name="DEALNO" class="java.lang.String"/>
+	<field name="DEALID" class="java.math.BigDecimal"/>
+	<field name="MFDEALID" class="java.math.BigDecimal"/>
+	<field name="DEALDATE" class="java.sql.Timestamp"/>
+	<field name="EXPECTEDCLOSEDATE" class="java.sql.Timestamp"/>
+	<field name="CURRENCYID" class="java.math.BigDecimal"/>
+	<field name="AMOUNT" class="java.math.BigDecimal"/>
+	<field name="DEALACC" class="java.lang.String"/>
+	<field name="RESTAMOUNT" class="java.math.BigDecimal"/>
+	<field name="OVRACC" class="java.lang.String"/>
+	<field name="OVERDUEAMOUNT" class="java.math.BigDecimal"/>
+	<field name="INTERESTACC" class="java.lang.String"/>
+	<field name="INTERESTAMOUNT" class="java.math.BigDecimal"/>
+	<field name="INTEROVRACC" class="java.lang.String"/>
+	<field name="INTEROVRDAMOUNT" class="java.math.BigDecimal"/>
+	<field name="FEEACC" class="java.lang.String"/>
+	<field name="FEEAMOUNT" class="java.math.BigDecimal"/>
+	<field name="FEEOVRACC" class="java.lang.String"/>
+	<field name="FEEOVRDAMOUNT" class="java.math.BigDecimal"/>
+	<field name="CURRENTINTERESTRATE" class="java.math.BigDecimal"/>
+	<field name="BRANCH_ID" class="java.math.BigDecimal"/>
+	<variable name="All_Borg" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{OVERDUEAMOUNT} == null ? 0 : $F{OVERDUEAMOUNT})+($F{INTEROVRDAMOUNT}== null ? 0 : $F{INTEROVRDAMOUNT})+($F{FEEOVRDAMOUNT}== null ? 0 : $F{FEEOVRDAMOUNT})]]></variableExpression>
+	</variable>
+	<variable name="sum_osn" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{RESTAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="sum_prostr_zab" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{OVERDUEAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="sum_nar_perc" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTERESTAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="sum_prostr_perc" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTEROVRDAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="kom_nar" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEEAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="kom_prostr" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEEOVRDAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="all_prostr" class="java.math.BigDecimal" resetType="Group" resetGroup="VAL_ID" calculation="Sum">
+		<variableExpression><![CDATA[$V{All_Borg}]]></variableExpression>
+	</variable>
+	<group name="VAL_ID">
+		<groupExpression><![CDATA[$F{CURRENCYID}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="1600" height="20" forecolor="#000000" backcolor="#99FFCC" uuid="841eedf9-b365-419e-8cbc-f43324c529bb">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="Start"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Валюта: '+ ($F{CURRENCYID})]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="700" height="20" forecolor="#000000" backcolor="#99FFCC" uuid="9f07e058-6c01-41c2-b3af-374d3a3351cc">
+						<property name="net.sf.jasperreports.export.xls.row.outline.level.1" value="End"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Всього по валюті '+ ($F{CURRENCYID})]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1300" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="6977f1d4-5263-47f5-b0b2-897cadd11afa"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{all_prostr}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="700" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="b873b49f-72f0-461b-9204-6d48f702e5b6"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{sum_osn}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="800" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="01240daa-aab9-41d0-aab1-22c9c27b86b1"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{sum_prostr_zab}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="900" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="ebec49b8-a2a1-4479-b6af-df62822ba74b"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{sum_nar_perc}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1000" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="cc65a7a0-bb15-4219-b7e9-0215cfd94b42"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{sum_prostr_perc}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1100" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="187801d9-04c9-4a2a-b0a7-512bc755f9ce"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{kom_nar}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="1200" y="0" width="100" height="20" backcolor="#9BFFCC" uuid="23126102-0b3e-4b7d-a7bc-819db414010d"/>
+					<box rightPadding="5">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{kom_prostr}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="1400" y="0" width="200" height="20" backcolor="#9BFFCC" uuid="037ce41e-360c-4098-8b80-7f453f156d0d"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle"/>
+					<text><![CDATA[]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="1600" height="60" backcolor="#66CCFF" uuid="04c72a54-93a7-4061-a082-d259a7e515bb"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Проблемна заборгованість за кредитами фізичних осіб  на '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{date_zvit}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="75" height="60" backcolor="#FFFF33" uuid="62d00253-f0a9-4cf9-93fe-8e0d57dfc3bc"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Код контрагента]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="75" y="0" width="220" height="60" backcolor="#FFFF33" uuid="00ca34ba-602e-4176-8195-bbe8dcac2c9f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[ПІБ Позичальника]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="295" y="0" width="105" height="60" backcolor="#FFFF33" uuid="c28ad8c2-f267-43b7-b61d-a69b70878bcc"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Номер кредитного договору]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="400" y="0" width="60" height="60" backcolor="#FFFF33" uuid="7946e52f-982e-494f-8142-a109312f8864"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Дата "С"]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="460" y="0" width="60" height="60" backcolor="#FFFF33" uuid="87e1134e-37e6-41b7-85ff-4126ee1e3398"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Дата "По"]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="620" y="0" width="80" height="60" backcolor="#FFFF33" uuid="48790633-4c70-496a-b604-b2d790625221"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Код валюти]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="520" y="0" width="100" height="60" backcolor="#FFFF33" uuid="3e2b4392-3f5d-4cb9-863f-05c91e99b185"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума по договору]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="700" y="0" width="100" height="60" backcolor="#FFFF33" uuid="b7e9d440-9506-4b35-81b4-c2e1688c85b0"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума основної заборгованості]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="800" y="0" width="100" height="60" backcolor="#FFFF33" uuid="ea7afd72-a751-475d-b11a-af980813b6f6"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума простроченої заборгованості]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="900" y="0" width="100" height="60" backcolor="#FFFF33" uuid="ae53f55a-a4bb-4a5c-baf7-237bb408786b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сумма нарахованих %% ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1000" y="0" width="100" height="60" backcolor="#FFFF33" uuid="9e0c0391-fab3-423f-9877-612fcbca6b54"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Сума прострочених %% ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1100" y="0" width="100" height="60" backcolor="#FFFF33" uuid="5d6c32e1-a96d-4171-bd93-380e3e3fcc71"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Комісія нарахована]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1200" y="0" width="100" height="60" backcolor="#FFFF33" uuid="e1f21072-caa7-4e17-a1c2-0537f5188e7a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Комісія прострочена]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1400" y="0" width="100" height="60" backcolor="#FFFF33" uuid="8eed5539-997f-47b4-8bd8-059f09e5cf32"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[ Ставка]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1500" y="0" width="100" height="60" backcolor="#FFFF33" uuid="d1614b12-eaf0-4cc0-bdec-e5825000406f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Код ТВБВ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1300" y="0" width="100" height="60" backcolor="#FFFF33" uuid="1afbe241-f7c4-4d1d-b23a-c05fc908cd17"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Загальна сума простроченої заборгованості]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="75" height="20" isPrintWhenDetailOverflows="true" uuid="d948ecdf-79ca-4eda-9ba1-d50cc47716da"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTID}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="75" y="0" width="220" height="20" isPrintWhenDetailOverflows="true" uuid="e1d1655b-0def-496e-a9f5-03371bf3b9f5"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CONTRAGENTNAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="295" y="0" width="105" height="20" isPrintWhenDetailOverflows="true" uuid="ab7d4e3d-42b0-4802-af73-49dbe936d5be"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEALNO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="400" y="0" width="60" height="20" isPrintWhenDetailOverflows="true" uuid="118e63e2-4805-416b-be28-f26c4363a70a"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEALDATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="460" y="0" width="60" height="20" isPrintWhenDetailOverflows="true" uuid="90eea034-7039-42cf-8753-3ca8b3dbeabe"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{EXPECTEDCLOSEDATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="620" y="0" width="80" height="20" isPrintWhenDetailOverflows="true" uuid="9dbcf94c-5d50-4321-a6dc-154f1d575172"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENCYID}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="520" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="67b9c333-fc23-428f-9898-1756a57fb34f"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="700" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="1b495cf6-5ccc-4cb7-bbec-9dfdc818f3db"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[($F{RESTAMOUNT}== null ? 0 : $F{RESTAMOUNT})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="800" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="9f069479-8132-4a69-b6dc-b34b8e902f18"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[($F{OVERDUEAMOUNT}== null ? 0 : $F{OVERDUEAMOUNT})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="900" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="42777ed0-1ea4-452c-9eda-a8b83d597ab3"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INTERESTAMOUNT}== null ? 0 : $F{INTERESTAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1000" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="2fa4271b-4051-4f48-9e08-9e4ca861cdfd"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INTEROVRDAMOUNT}== null ? 0 : $F{INTEROVRDAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1100" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="06252083-c30a-4817-8f46-6dc780ac7100"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{FEEAMOUNT}== null ? 0 : $F{FEEAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1200" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="0678c02d-6241-4bda-b37c-925cc9401b12"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[($F{FEEOVRDAMOUNT} == null ? 0 : $F{FEEOVRDAMOUNT} )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="###0.00;-###0.00">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Transparent" x="1400" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" backcolor="#FFFFFF" uuid="334ee430-7a36-4891-8db3-543e4e44659e"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENTINTERESTRATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1500" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="b19c86e2-1f2c-44f0-b1ce-4cae948c503e"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{BRANCH_ID}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;#,##0.00-" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1300" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="6de3fbc4-c587-439a-8339-8744210c284e"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{All_Borg}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

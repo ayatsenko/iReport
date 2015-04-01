@@ -1,0 +1,2673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" language="groovy" pageWidth="595" pageHeight="1500" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="5727b514-5c58-45bc-a814-cf5ebf5acb84">
+	<property name="ireport.zoom" value="1.0263162364614138"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="222"/>
+	<property name="net.sf.jasperreports.export.xls.freeze.row" value="3"/>
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<property name="detectCellType" value="false"/>
+	<parameter name="StartDate" class="java.util.Date">
+		<parameterDescription><![CDATA[Дата C]]></parameterDescription>
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EndDate" class="java.util.Date">
+		<parameterDescription><![CDATA[Дата По]]></parameterDescription>
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select * from
+(
+/* Всего открытых корпоративных счетов */
+
+select count(*) count_corp_aac_all
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen <=$P{EndDate}
+        and ((a.dateclose is null) or (a.dateclose >$P{EndDate}))
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650) ) count1,
+(
+/* Всего открытых корпоративных счетов в ГРН*/
+
+select count(*) count_corp_aac_uah_all
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen <=$P{EndDate}
+    and ((a.dateclose is null) or (a.dateclose >$P{EndDate}))
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650)
+        and a.currencyid in(980) ) count2,
+
+(
+/* Количество открытых корпоративных счетов за период */
+
+select count(*) count_corp_aac
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650) ) count3,
+(
+/* Количество открытых корпоративных счетов за период в ГРН*/
+
+select count(*) count_corp_aac_uah
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650)
+        and a.currencyid in(980) ) count4,
+(
+/* Количество закрытых корпоративных счетов за период */
+
+select count(*) count_corp_aac_close
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateclose between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650) ) count5,
+(
+/* Количество закрытых корпоративных счетов за период в ГРН*/
+
+select count(*) count_corp_aac_uah_close
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateclose between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2600,2650)
+        and a.currencyid in(980) ) count6,
+
+(
+/* Количество открытых корпоративных карточных счетов за период */
+
+select count(*) count_corp_aac_card
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2605) ) count7,
+(
+/* Количество открытых корпоративных карточных счетов за период в ГРН*/
+
+select count(*) count_corp_aac_card_uah
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateopen between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2605)
+        and a.currencyid in(980) ) count8,
+(
+/* Количество закрытых корпоративных карточных счетов за период */
+
+select count(*) count_corp_aac_card_close
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateclose between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2605) ) count9,
+(
+/* Количество закрытых корпоративных карточных счетов за период в ГРН*/
+
+select count(*) count_corp_aac_card_uah_close
+        FROM creator.aaccount a,
+             creator.contragent c
+        where a.dateclose between $P{StartDate} and $P{EndDate}
+        and c.id = a.contragentid
+        and a.baccountid in(2605)
+        and a.currencyid in(980) ) count10,
+
+(
+/* Количество корпоративных счетов с остатками выше 100 тыс грн. в экв. за период*/
+
+select count(*) count_corp_aac_top
+         FROM (
+               select aac.accountid,
+                  a.baccountid,
+                     a.currencyid currencyid,
+                      cal.arcdate arcdate,
+                  aac.summanow,
+              round(aac.summanow*acur.Rate/acur.Base) summanoweq,
+                      (acur.Rate/acur.Base) kurs
+              from    creator.arc_aaccount aac,
+                      creator.aaccount a,
+                      creator.calendar cal,
+                      creator.contragent c,
+                      creator.currencyrateall acur
+          where
+        a.id = aac.accountid
+    and cal.arcdate >= aac.arcdate
+        and cal.arcdate <  aac.validtill
+        and acur.arcdate = cal.arcdate
+        and acur.currencyid = a.currencyid
+        and cal.arcdate =$P{EndDate}
+        and a.currencyid = acur.currencyid
+        and c.id = a.contragentid
+        and a.baccountid in (2600,2602,2603,2650)
+           ) where summanoweq>=10000000) count11,
+(
+/* Количество корпоративных счетов с остатками выше 100 тыс грн. в экв. за период в ГРН*/
+
+select count(*) count_corp_aac_top_uah
+         FROM (
+               select aac.accountid,
+                  a.baccountid,
+                     a.currencyid currencyid,
+                      cal.arcdate arcdate,
+                  aac.summanow,
+              round(aac.summanow*acur.Rate/acur.Base) summanoweq,
+                      (acur.Rate/acur.Base) kurs
+              from    creator.arc_aaccount aac,
+                      creator.aaccount a,
+                      creator.calendar cal,
+                      creator.contragent c,
+                      creator.currencyrateall acur
+          where
+        a.id = aac.accountid
+    and cal.arcdate >= aac.arcdate
+        and cal.arcdate <  aac.validtill
+        and acur.arcdate = cal.arcdate
+        and acur.currencyid = a.currencyid
+        and cal.arcdate =$P{EndDate}
+        and a.currencyid = acur.currencyid
+        and c.id = a.contragentid
+        and a.baccountid in (2600,2602,2603,2650)
+                and a.currencyid in(980)
+           ) where summanoweq>=10000000) count12,
+(
+select
+SUM_CORP_AAC_INCOME_UAH,
+SUM_CORP_AAC_OUTCOME_UAH,
+SUM_CORP_AAC_INCOME_UAH-SUM_CORP_AAC_OUTCOME_UAH SALDO_CORP_AAC_UAH
+from
+
+(
+
+/* Приход на корпоративные счета за период в ГРН*/
+
+SELECT SUM(v.summaeq)/100 SUM_CORP_AAC_INCOME_UAH
+FROM creator.arc_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2600%' or v.accountbno like '2603%' or v.accountbno like '2650%')
+and v.bankaid<>'319111' ) count13,
+
+(
+
+/* Проплаты с корпоративных счетов за период в ГРН*/
+
+SELECT SUM(v.summaeq)/100 SUM_CORP_AAC_OUTCOME_UAH
+FROM creator.arc_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountano like '2600%' or v.accountano like '2603%' or v.accountano like '2650%')
+and v.bankbid<>'319111' ) count14
+) count26,
+(
+
+/* Средние остатки на корпоративных счетах за период */
+
+SELECT
+       (nvl(summ_in_uah.avg_summeq,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_EQ_UAH,
+       (nvl(summ_uah.avg_summ,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_UAH,
+       (nvl(summ_usd.avg_summ,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_USD,
+       (nvl(summ_gbp.avg_summ,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_GPB,
+       (nvl(summ_rub.avg_summ,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_RUB,
+       (nvl(summ_eur.avg_summ,0)/(TotalDays))/100 AVG_CORP_ACC_DAY_EUR
+
+FROM
+(
+SELECT count(1) TotalDays
+    FROM creator.calendar c
+    WHERE arcdate BETWEEN $P{StartDate} and $P{EndDate}
+      ) days,
+(
+SELECT SUM(b.summanoweq) avg_summeq
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and b.summanoweq>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_in_uah,
+(
+SELECT SUM(b.summanow) avg_summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and a.currencyid = b.currencyid
+         and b.summanow>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and a.currencyid in (980)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_uah,
+(
+SELECT SUM(b.summanow) avg_summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and a.currencyid = b.currencyid
+         and b.summanow>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and a.currencyid in (840)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_usd,
+(
+SELECT SUM(b.summanow) avg_summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and a.currencyid = b.currencyid
+         and b.summanow>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and a.currencyid in (826)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_gbp,
+(
+SELECT SUM(b.summanow) avg_summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and a.currencyid = b.currencyid
+         and b.summanow>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and a.currencyid in (643)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_rub,
+(
+SELECT SUM(b.summanow) avg_summ
+        FROM creator.varc_balance b,
+             creator.aaccount a
+         WHERE b.arcdate BETWEEN $P{StartDate} and $P{EndDate}
+         and b.corrmode IN (0, 2)
+         and a.id = b.accountid
+         and a.currencyid = b.currencyid
+         and b.summanow>0
+         and b.baccountid in (2600,2602,2603,2604,2605,2650)
+         and a.currencyid in (978)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+         ) summ_eur
+) count15,
+
+(
+select
+SUM_CORP_ACC_DEP_OUT_IN_UAH,
+SUM_CORP_ACC_DEP_OUT_UAH,
+SUM_CORP_ACC_DEP_OUT_USD,
+SUM_CORP_ACC_DEP_OUT_EUR,
+SUM_CORP_ACC_DEP_IN_IN_UAH,
+SUM_CORP_ACC_DEP_IN_UAH,
+SUM_CORP_ACC_DEP_IN_USD,
+SUM_CORP_ACC_DEP_IN_EUR,
+SUM_CORP_ACC_DEP_IN_IN_UAH-SUM_CORP_ACC_DEP_OUT_IN_UAH SALDO_DEP_ALL_UAH,
+SUM_CORP_ACC_DEP_IN_UAH-SUM_CORP_ACC_DEP_OUT_UAH SALDO_DEP_UAH,
+SUM_CORP_ACC_DEP_IN_USD-SUM_CORP_ACC_DEP_OUT_USD SALDO_DEP_USD,
+SUM_CORP_ACC_DEP_IN_EUR-SUM_CORP_ACC_DEP_OUT_EUR SALDO_DEP_EUR
+from
+(
+
+/* Приход депозитов корпоративных клиентов за период */
+
+SELECT
+       nvl(dep_in_sum_in_uah.summ,0)/100 SUM_CORP_ACC_DEP_IN_IN_UAH,
+       nvl(dep_in_sum_uah.summ,0)/100 SUM_CORP_ACC_DEP_IN_UAH,
+       nvl(dep_in_sum_usd.summ,0)/100 SUM_CORP_ACC_DEP_IN_USD,
+       nvl(dep_in_sum_eur.summ,0)/100 SUM_CORP_ACC_DEP_IN_EUR
+ FROM
+
+(
+
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountbno,1,4) in ('2610','22615','2651','2652')
+and v.bankbid like '319111'
+) dep_in_sum_in_uah,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountbno,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (980)
+and v.bankbid like '319111'
+) dep_in_sum_uah,
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountbno,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (840)
+and v.bankbid like '319111'
+) dep_in_sum_usd,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountbno,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (978)
+and v.bankbid like '319111'
+) dep_in_sum_eur
+
+) count16,
+
+(
+
+/* Возвращено депозитов корпоративных клиентов за период */
+
+SELECT
+       nvl(dep_out_sum_in_uah.summ,0)/100 SUM_CORP_ACC_DEP_OUT_IN_UAH,
+       nvl(dep_out_sum_uah.summ,0)/100 SUM_CORP_ACC_DEP_OUT_UAH,
+       nvl(dep_out_sum_usd.summ,0)/100 SUM_CORP_ACC_DEP_OUT_USD,
+       nvl(dep_out_sum_eur.summ,0)/100 SUM_CORP_ACC_DEP_OUT_EUR
+ FROM
+
+(
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2610','22615','2651','2652')
+and v.bankaid like '319111'
+) dep_out_sum_in_uah,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (980)
+and v.bankaid like '319111'
+) dep_out_sum_uah,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (840)
+and v.bankaid like '319111'
+) dep_out_sum_usd,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2610','22615','2651','2652')
+and v.currencyid in (978)
+and v.bankaid like '319111'
+) dep_out_sum_eur
+
+) count17
+) count25,
+
+(
+select
+SUM_CORP_ACC_CRED_OUT_IN_UAH,
+SUM_CORP_ACC_CRED_OUT_UAH,
+SUM_CORP_ACC_CRED_OUT_USD,
+SUM_CORP_ACC_CRED_OUT_EUR,
+SUM_CORP_ACC_CRED_OUT_RUB,
+SUM_CORP_ACC_CRED_IN_IN_UAH,
+SUM_CORP_ACC_CRED_IN_UAH,
+SUM_CORP_ACC_CRED_IN_USD,
+SUM_CORP_ACC_CRED_IN_EUR,
+SUM_CORP_ACC_CRED_IN_RUB,
+SUM_CORP_ACC_CRED_OUT_IN_UAH-SUM_CORP_ACC_CRED_IN_IN_UAH SALDO_CRED_ALL_UAH,
+SUM_CORP_ACC_CRED_OUT_UAH-SUM_CORP_ACC_CRED_IN_UAH SALDO_CRED_UAH,
+SUM_CORP_ACC_CRED_OUT_USD-SUM_CORP_ACC_CRED_IN_USD SALDO_CRED_USD,
+SUM_CORP_ACC_CRED_OUT_EUR-SUM_CORP_ACC_CRED_IN_EUR SALDO_CRED_EUR,
+SUM_CORP_ACC_CRED_OUT_RUB-SUM_CORP_ACC_CRED_IN_RUB SALDO_CRED_RUB
+ from
+(
+
+/* Выдано кредитов корпоративным клиентам за период */
+
+SELECT
+       nvl(cred_out_sum_in_uah.summ,0)/100 SUM_CORP_ACC_CRED_OUT_IN_UAH,
+       nvl(cred_out_sum_uah.summ,0)/100 SUM_CORP_ACC_CRED_OUT_UAH,
+       nvl(cred_out_sum_usd.summ,0)/100 SUM_CORP_ACC_CRED_OUT_USD,
+       nvl(cred_out_sum_eur.summ,0)/100 SUM_CORP_ACC_CRED_OUT_EUR,
+       nvl(cred_out_sum_rub.summ,0)/100 SUM_CORP_ACC_CRED_OUT_RUB
+
+ FROM
+
+(
+
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2062','2063')
+and substr(v.accountbno,1,4) in ('2600','1919')
+and v.bankaid like '319111'
+) cred_out_sum_in_uah,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2062','2063')
+and substr(v.accountbno,1,4) in ('2600','1919')
+and v.currencyid in (980)
+and v.bankaid like '319111'
+) cred_out_sum_uah,
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2062','2063')
+and substr(v.accountbno,1,4) in ('2600','1919')
+and v.currencyid in (840)
+and v.bankaid like '319111'
+) cred_out_sum_usd,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2062','2063')
+and substr(v.accountbno,1,4) in ('2600','1919')
+and v.currencyid in (978)
+and v.bankaid like '319111'
+) cred_out_sum_eur,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and substr(v.accountano,1,4) in ('2062','2063')
+and substr(v.accountbno,1,4) in ('2600','1919')
+and v.currencyid in (643)
+and v.bankaid like '319111'
+) cred_out_sum_rub
+
+
+) count19,
+
+(
+
+/* Возвращено кредитов от корпоративных клиентов за период */
+
+SELECT
+       nvl(cred_in_sum_in_uah.summ,0)/100 SUM_CORP_ACC_CRED_IN_IN_UAH,
+       nvl(cred_in_sum_uah.summ,0)/100 SUM_CORP_ACC_CRED_IN_UAH,
+       nvl(cred_in_sum_usd.summ,0)/100 SUM_CORP_ACC_CRED_IN_USD,
+       nvl(cred_in_sum_eur.summ,0)/100 SUM_CORP_ACC_CRED_IN_EUR,
+       nvl(cred_in_sum_rub.summ,0)/100 SUM_CORP_ACC_CRED_IN_RUB
+
+ FROM
+
+(
+
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2062%' or v.accountbno like '2063%' or v.accountbno like '2067%')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2063')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2063')
+and v.bankbid like '319111'
+) cred_in_sum_in_uah,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2062%' or v.accountbno like '2063%' or v.accountbno like '2067%')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2063')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2063')
+and v.currencyid in (980)
+and v.bankbid like '319111'
+) cred_in_sum_uah,
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2062%' or v.accountbno like '2063%' or v.accountbno like '2067%')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2063')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2063')
+and v.currencyid in (840)
+and v.bankbid like '319111'
+) cred_in_sum_usd,
+
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2062%' or v.accountbno like '2063%' or v.accountbno like '2067%')
+and v.currencyid in (978)
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2063')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2063')
+and v.bankbid like '319111'
+) cred_in_sum_eur,
+(
+SELECT SUM(v.summa) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountbno like '2062%' or v.accountbno like '2063%' or v.accountbno like '2067%')
+and v.currencyid in (643)
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2063')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2062' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2063' and substr(v.accountbno,1,4)='2067')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2062')
+and not (substr(v.accountano,1,4)='2067' and substr(v.accountbno,1,4)='2063')
+and v.bankbid like '319111'
+) cred_in_sum_rub
+
+
+) count20
+) count24,
+
+
+(
+
+/* Сумма депозитов корпоративных клиентов на отчетную дату */
+
+SELECT
+    nvl(dep_sum_in_uah.summ,0)/100 sum_corp_aac_dep_date_in_uah,
+    nvl(dep_sum_uah.summ,0)/100 sum_corp_aac_dep_date_uah,
+    nvl(dep_sum_usd.summ,0)/100 sum_corp_aac_dep_date_usd,
+    nvl(dep_sum_eur.summ,0)/100 sum_corp_aac_dep_date_eur
+
+FROM
+
+(
+select sum(b.summanoweq) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2610,2615,2651,2652)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) dep_sum_in_uah,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2610,2615,2651,2652)
+         and a.currencyid in (980)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) dep_sum_uah,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2610,2615,2651,2652)
+         and a.currencyid in (840)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) dep_sum_usd,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2610,2615,2651,2652)
+         and a.currencyid in (978)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) dep_sum_eur
+) count18,
+
+
+
+(
+
+/* Сумма кредитов по корпоративным клиентам на отчетную дату */
+
+
+SELECT
+    (nvl(credit_sum_in_uah.summ,0)/100)*(-1) sum_corp_aac_cred_date_in_uah,
+    (nvl(credit_sum_uah.summ,0)/100)*(-1) sum_corp_aac_cred_date_uah,
+    (nvl(credit_sum_usd.summ,0)/100)*(-1) sum_corp_aac_cred_date_usd,
+    (nvl(credit_sum_eur.summ,0)/100)*(-1) sum_corp_aac_cred_date_eur,
+    (nvl(credit_sum_rub.summ,0)/100)*(-1) sum_corp_aac_cred_date_rub,
+    (nvl(credit_sum_delay_in_uah.summ,0)/100)*(-1) sum_corp_aac_del_in_uah,
+    (nvl(credit_sum_overdraft_in_uah.summ,0)/100)*(-1) sum_corp_aac_over_in_uah
+FROM
+
+(
+select sum(b.summanoweq) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and ((b.baccountid in (2062,2063,2067)) or (b.baccountid in (2600,2650) and b.summanoweq<0))
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_in_uah,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2062,2063)
+         and a.currencyid in (980)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_uah,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2062,2063)
+         and a.currencyid in (840)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_usd,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2062,2063)
+         and a.currencyid in (978)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_eur,
+(
+select sum(b.summanow) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2062,2063)
+         and a.currencyid in (643)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_rub,
+(
+select sum(b.summanoweq) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2067)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_delay_in_uah,
+(
+select sum(b.summanoweq) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (2600,2650)
+         and b.summanoweq<0
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) credit_sum_overdraft_in_uah
+
+
+) count21,
+
+(
+
+/* Сумма гарантий корпоративным клиентам на отчетную дату */
+
+
+SELECT
+    (nvl(warranty_sum_in_uah.summ,0)/100)*(-1) sum_corp_aac_war_in_uah
+FROM
+
+(
+select sum(b.summanoweq) summ
+         FROM creator.varc_balance b,
+              creator.aaccount a
+         WHERE b.arcdate =$P{EndDate}
+         and a.id = b.accountid
+         and b.corrmode IN (0, 2)
+         and b.baccountid in (9020)
+         and (a.dateclose is null or a.dateclose >=$P{EndDate})
+) warranty_sum_in_uah
+
+) count22,
+
+(
+
+/* Сумма коммиссий за предоставление кредитов на отчетную дату */
+
+
+SELECT
+    (nvl(commission_sum_in_uah.summ,0)/100)  sum_corp_aac_com_in_uah
+FROM
+
+(
+select sum(summ) summ from (
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountano like '37%' or v.accountano like '39%')
+and (v.accountbno like '2066%')
+and v.bankaid like '319111'
+union all
+SELECT SUM(v.summaeq) summ
+FROM creator.vall_document v
+WHERE v.arcdate between $P{StartDate} and $P{EndDate}
+and (v.accountano like '2600%' or v.accountano like '2650%')
+and (v.accountbno like '3600%')
+and v.bankaid like '319111'
+)
+) commission_sum_in_uah
+) count23]]>
+	</queryString>
+	<field name="COUNT_CORP_AAC_ALL" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_UAH_ALL" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_UAH" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_CLOSE" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_UAH_CLOSE" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_CARD" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_CARD_UAH" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_CARD_CLOSE" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_CARD_UAH_CLOSE" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_TOP" class="java.math.BigDecimal"/>
+	<field name="COUNT_CORP_AAC_TOP_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_INCOME_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_OUTCOME_UAH" class="java.math.BigDecimal"/>
+	<field name="SALDO_CORP_AAC_UAH" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_EQ_UAH" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_UAH" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_USD" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_GPB" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_RUB" class="java.math.BigDecimal"/>
+	<field name="AVG_CORP_ACC_DAY_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_OUT_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_OUT_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_OUT_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_OUT_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_IN_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_IN_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_DEP_IN_EUR" class="java.math.BigDecimal"/>
+	<field name="SALDO_DEP_ALL_UAH" class="java.math.BigDecimal"/>
+	<field name="SALDO_DEP_UAH" class="java.math.BigDecimal"/>
+	<field name="SALDO_DEP_USD" class="java.math.BigDecimal"/>
+	<field name="SALDO_DEP_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_OUT_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_OUT_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_OUT_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_OUT_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_OUT_RUB" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_IN_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_IN_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_IN_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_ACC_CRED_IN_RUB" class="java.math.BigDecimal"/>
+	<field name="SALDO_CRED_ALL_UAH" class="java.math.BigDecimal"/>
+	<field name="SALDO_CRED_UAH" class="java.math.BigDecimal"/>
+	<field name="SALDO_CRED_USD" class="java.math.BigDecimal"/>
+	<field name="SALDO_CRED_EUR" class="java.math.BigDecimal"/>
+	<field name="SALDO_CRED_RUB" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_DEP_DATE_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_DEP_DATE_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_DEP_DATE_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_DEP_DATE_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_CRED_DATE_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_CRED_DATE_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_CRED_DATE_USD" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_CRED_DATE_EUR" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_CRED_DATE_RUB" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_DEL_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_OVER_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_WAR_IN_UAH" class="java.math.BigDecimal"/>
+	<field name="SUM_CORP_AAC_COM_IN_UAH" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20">
+			<textField pattern="dd.MM.yyyy">
+				<reportElement x="0" y="0" width="595" height="20" uuid="f1859dcb-984c-4a45-84ff-98f1b3a5e668"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA['Звіт за період з '+ (new SimpleDateFormat("dd.MM.yyyy").format($P{StartDate}))+' по ' +(new SimpleDateFormat("dd.MM.yyyy").format($P{EndDate}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20">
+			<staticText>
+				<reportElement x="357" y="0" width="238" height="20" uuid="830d839f-89e2-4b15-a118-49cdcdacd9d4"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Значення]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="357" height="20" uuid="0cfb2e5e-0577-435a-87c3-b95bf8690bbc"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Найменування показника]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="722" splitType="Stretch">
+			<elementGroup/>
+			<elementGroup/>
+			<staticText>
+				<reportElement x="0" y="312" width="357" height="12" uuid="c87c1b9b-f00a-45d9-a57b-ca0776b8f1a1"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="264" width="357" height="12" uuid="d43e9e75-e0ac-4c32-8a8f-94b043cb8793"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="456" width="357" height="12" uuid="4e8e4fe8-608f-4c34-8741-03f7dc4f9e40"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="168" width="357" height="12" uuid="1ce3f265-9d0b-4b36-b2a2-3aa1c2f2d6ec"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Середньоденні залишки на поточних рахунках юр.осіб(грн.екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="120" width="357" height="12" uuid="079a09e6-7587-4996-b1ac-bcca61534024"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Кількість рахунків юр. осіб з суттєвими залишками (>100 тис) на звітну дату грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="60" width="357" height="12" uuid="fa9ee7c7-f10c-4dec-a903-67192c63826d"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="12" width="357" height="12" uuid="687aa4e0-40a4-4d3d-ac2d-98e729ca8c8c"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="24" width="357" height="12" uuid="ea1c1e1e-0ed0-4975-b5ec-01f509f033c5"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Кількість відкритих поточних рахунків юр. осіб]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="228" width="357" height="12" uuid="04e7bec9-34db-4222-a586-0c1834648b51"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="357" height="12" uuid="9baf14e5-c475-434f-8dea-37700e7028d1"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Всього відкритих поточних рахунків юр. осіб]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="516" width="357" height="12" uuid="dbb5301d-405b-4fb8-9dcf-af546f5ddb0b"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="276" width="357" height="12" uuid="56dfe2c3-79a1-4f7f-82a5-401af7cbb8e7"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="528" width="357" height="12" uuid="f8febaff-3b9d-40c6-9d7e-2d67d1e407a6"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="96" width="357" height="12" uuid="36e9768e-cd1b-4fb8-b9f7-d65f21bed687"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Кількість закритих корпоративних карткових рахунків юр. осіб]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="84" width="357" height="12" uuid="a4a7a9c5-b231-4f32-9011-92f6db522e05"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="696" width="357" height="12" uuid="87338e28-6830-420c-8def-ffb1a58afdee"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[овердрафти(грн.екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="216" width="357" height="12" uuid="18946d4b-7a40-47b9-a982-3fd01a68d8d4"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в рублях]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="180" width="357" height="12" uuid="c502eb68-b935-41ce-9a48-5e8092b15f70"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="156" width="357" height="12" uuid="a4fd1de6-53a4-4802-ba56-3c876eb4ef6f"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Проплати з поточних рахунків юр. осіб (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="300" width="357" height="12" uuid="9834d70d-6760-4f15-9278-de70c5fc9a3e"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Повернуто депозитів юр. осіб (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="288" width="357" height="12" uuid="b27c5092-6242-4927-b405-dc86927583ba"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="708" width="357" height="14" uuid="fa8d3553-5f64-4d04-a73d-6cf903965767"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Комісія за надання кредиту]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="648" width="357" height="12" uuid="bb6449e4-457d-4538-bfda-5486de3821b1"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="624" width="357" height="12" uuid="b32db685-7802-4783-b181-3544229313b9"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Cума кредитів юр. осіб на звітну дату (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="36" width="357" height="12" uuid="d935a9db-59ca-4a88-894a-b9ffe94af353"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="336" width="357" height="12" uuid="d1459677-1923-4f6d-b4aa-fc6ef9353b4d"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="480" width="357" height="12" uuid="4c104375-e834-4cc3-9e05-d2a54c617727"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="540" width="357" height="12" uuid="94c1226f-db84-44af-af92-b2dccaeba66d"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="132" width="357" height="12" uuid="a2f1a354-1e6c-4649-94be-c8f53d6d8a7c"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="108" width="357" height="12" uuid="e8e8a5fa-4d98-4301-a37c-45719c9a5ac6"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="324" width="357" height="12" uuid="91964b5e-8a1f-4521-816d-1bd4f8c8bae4"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="192" width="357" height="12" uuid="c670aefa-9180-4f81-91ec-0967cde358d2"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="444" width="357" height="12" uuid="16ab37d3-89cf-4620-b61e-be41bf4e4aff"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Видано кредитів юр. особам (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="48" width="357" height="12" uuid="15c06acc-3300-47ae-b188-6cf68fbe1d01"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Кількість закритих поточних рахунків юр. осіб]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="252" width="357" height="12" uuid="f7dd51e7-afe9-40dc-b84d-14dc13df7b5a"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Залучено депозитів юр. осіб (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="684" width="357" height="12" uuid="e79fe0e4-fdd5-4b7a-ba45-848e01d10343"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[прострочених(грн.екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="204" width="357" height="12" uuid="4cd70016-d455-4dca-80fa-e2f18f983d03"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в фунтах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="144" width="357" height="12" uuid="b3774beb-1c4b-4c26-9344-effe58bcba96"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Надходження на поточні рахунки юр.осіб (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="72" width="357" height="12" uuid="d991f12b-7c62-4346-9c3f-e2aa41ee2b5a"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Кількість відкритих корпоративних карткових рахунків юр. осіб]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="504" width="357" height="12" uuid="7f23b234-0de2-424c-8b4c-e07b7569fc40"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Погашено кредити юр. особами (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="660" width="357" height="12" uuid="d03cbd3e-20b6-4bbe-9466-12649be124b0"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="468" width="357" height="12" uuid="33a29483-c06f-4d40-b767-fd867a8d193c"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="636" width="357" height="12" uuid="4b55147a-6197-40cf-90be-69c2295d0a82"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="624" width="238" height="12" uuid="a6e498e1-f7b9-4bbe-a5cb-8d656c360e91"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_CRED_DATE_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="108" width="238" height="12" uuid="fea18392-58d4-472d-a147-b35f4b914fee"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_CARD_UAH_CLOSE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="228" width="238" height="12" uuid="534d3394-6aa3-46e1-a644-814395260f74"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="264" width="238" height="12" uuid="dc82fb82-5072-4f56-a7be-2fb27e7dfc58"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="156" width="238" height="12" uuid="bedfcc31-a4e4-4ea7-bb9a-4530fc45e311"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_OUTCOME_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="72" width="238" height="12" uuid="3a5afb07-0afe-4290-ba0b-b5eec301c99f"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_CARD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="288" width="238" height="12" uuid="acd18f3a-2731-481a-a794-ae988c1c58af"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_IN_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="216" width="238" height="12" uuid="1032ebd3-48f2-4fa2-ac0a-7066d193d447"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_RUB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="204" width="238" height="12" uuid="001f5946-551a-424b-ae56-612ba603a7d3"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_GPB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="636" width="238" height="12" uuid="97f7728c-1fac-4b30-bba7-43ddf4c5bcd9"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_CRED_DATE_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="444" width="238" height="12" uuid="21eddcac-b112-4169-9ae8-e5e2ffd69451"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_OUT_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="36" width="238" height="12" uuid="d636dfd6-4c9f-4412-a7e6-42a6cb6f3306"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="456" width="238" height="12" uuid="35f72b4f-c570-4dd2-a619-f3e10f3b6d71"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_OUT_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="12" width="238" height="12" uuid="821520b5-83de-4a1a-936b-ada016bf1afb"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_UAH_ALL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="144" width="238" height="12" uuid="c688078f-ce1d-4a63-9d18-16c003f894ce"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_INCOME_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="504" width="238" height="12" uuid="0b013863-c02e-4656-84b9-54b87ee47ec3"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_IN_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="660" width="238" height="12" uuid="fe334c06-8a1f-4c9f-af34-4e8f86d79466"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_CRED_DATE_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="48" width="238" height="12" uuid="c3bc1f22-8b55-4f06-94ff-6a6b082e1973"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_CLOSE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="480" width="238" height="12" uuid="0c3d951b-f51f-484a-a31b-52d582db6245"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_OUT_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="84" width="238" height="12" uuid="bfb7e478-17a7-4d52-a330-a8cffd3b03d2"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_CARD_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="96" width="238" height="12" uuid="ce7777d9-0953-4baa-bd63-8e7aff680743"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_CARD_CLOSE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="132" width="238" height="12" uuid="19ed416e-c87e-4d09-b7fa-898e2c3c743b"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_TOP_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="120" width="238" height="12" uuid="bdc1d440-6f50-4fae-9138-bc66c3716f92"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_TOP}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="192" width="238" height="12" uuid="a4aa4a0a-7f82-4d74-8b92-bac350bf5991"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="300" width="238" height="12" uuid="e4ba8240-0e30-4b38-8758-9c89f264ef85"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_OUT_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="540" width="238" height="12" uuid="b72af2a0-2368-44be-bf40-89d07090f326"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_IN_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="24" width="238" height="12" uuid="3e65fcc7-5bb3-442c-ba96-9ca29ab085a0"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="168" width="238" height="12" uuid="846553b7-f080-4442-8847-deaca60e8752"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_EQ_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="528" width="238" height="12" uuid="ed088c9f-ff08-45eb-a93d-44a866d3070d"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_IN_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="312" width="238" height="12" uuid="d48df545-d71c-4fff-8a98-0c761eb574ba"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_OUT_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="696" width="238" height="12" uuid="f8bab980-c256-4765-af08-08f6fa05ca26"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_OVER_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="648" width="238" height="12" uuid="fe6c8f43-7e54-46d8-a813-f6c55333f5a3"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_CRED_DATE_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="516" width="238" height="12" uuid="cf460f0e-8613-46cf-84b8-b6622c0c31ea"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="468" width="238" height="12" uuid="75863889-895b-4e52-b659-e3505055d667"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_OUT_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="684" width="238" height="12" uuid="297e35b6-7102-4feb-b460-0228f98001f2"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_DEL_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="252" width="238" height="12" uuid="080a475d-fb90-4d06-b8dc-30f81123be8c"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_IN_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="324" width="238" height="12" uuid="5b5f5949-c393-4c5a-8c7f-971ba7c71789"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_OUT_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="60" width="238" height="12" uuid="087e5dc4-d201-45d0-80f9-edc42ff8f279"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_UAH_CLOSE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="336" width="238" height="12" uuid="7d4d3356-cd87-405c-8a9d-c0a97b4f2972"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_OUT_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="708" width="238" height="14" uuid="7b48b146-ebe9-4233-924f-776b1e2db199"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_COM_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="276" width="238" height="12" uuid="d443a5f6-5551-485b-86f8-adbdda7b76b2"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_DEP_IN_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="357" y="0" width="238" height="12" uuid="4abf0c47-3cf7-4b17-9433-b6141d6cd4e9"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CORP_AAC_ALL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="180" width="238" height="12" uuid="b2368d9b-a429-4ebc-b398-f6000cbddc89"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AVG_CORP_ACC_DAY_UAH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="240" width="357" height="12" uuid="ea33d8a1-3a2e-4140-bf33-e348124e1e3b"/>
+				<box leftPadding="4" rightPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CORP_AAC_UAH} < 0
+  ? "<style isBold='true'>Сальдо залишків поточних рахунків юр.осіб (грн. екв)</style>"
+  : "Сальдо залишків поточних рахунків юр.осіб (грн. екв)"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="240" width="238" height="12" forecolor="#FF6666" uuid="1d07657e-f934-4498-be8c-40c8b4483da1">
+					<printWhenExpression><![CDATA[$F{SALDO_CORP_AAC_UAH} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CORP_AAC_UAH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="384" width="357" height="12" uuid="4af50040-f667-44d8-af6a-91eff0d55e62"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_DEP_EUR} < 0
+  ? "<style isBold='true'>в т.ч. в євро</style>"
+  : "в т.ч. в євро"
+)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="372" width="357" height="12" uuid="9064ee32-c72a-499e-b08c-42cb0e454f40"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_DEP_USD} < 0
+  ? "<style isBold='true'>в т.ч. в доларах</style>"
+  : "в т.ч. в доларах"
+)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="348" width="357" height="12" uuid="5d13edf2-3e46-48ba-bca4-fe6b8c93e2ae"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_DEP_ALL_UAH} < 0
+  ? "<style isBold='true'>Сальдо депозитів юр. осіб (грн. екв.)</style>"
+  : "Сальдо депозитів юр. осіб (грн. екв.)"
+)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="360" width="357" height="12" uuid="1a9d3999-824b-4ba3-9de4-c7588e6d567e"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_DEP_UAH} < 0
+  ? "<style isBold='true'>в т.ч. в гривні</style>"
+  : "в т.ч. в гривні"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="360" width="238" height="12" forecolor="#FF6666" uuid="249fb746-fbb9-421e-9bc8-cc474ae713ee">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_UAH} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="372" width="238" height="12" forecolor="#FF6666" uuid="b8750513-545f-45a3-95c6-c142a7a76d50">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_USD} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="384" width="238" height="12" forecolor="#FF6666" uuid="ee04ba3f-ea2b-4f0b-b501-97ef3e616aa0">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_EUR} <0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="348" width="238" height="12" forecolor="#FF6666" uuid="81bc060e-32f8-4c26-a573-0822341e3f42">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_ALL_UAH} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_ALL_UAH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="408" width="357" height="12" uuid="f3f35bc6-e4d6-49dd-bc34-8e1131a2bfdd"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в гривні]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="420" width="238" height="12" uuid="21310227-b3e7-4cc8-8c3c-dbd9401b25df"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_DEP_DATE_USD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="420" width="357" height="12" uuid="e0a7d9ce-68cb-43c6-ac26-6ab4cb927588"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в доларах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="396" width="357" height="12" uuid="8fbb5ebf-fafb-48a0-b00f-e03bc591ae1a"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[Сума депозитів юр. осіб на звітну дату (грн. екв.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="432" width="357" height="12" uuid="5c2ba235-6663-47c2-a0b5-41f8fcc513ac"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в євро]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="408" width="238" height="12" uuid="ef5ad22d-59ed-4da3-bbaf-91fe769372c2"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_DEP_DATE_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="396" width="238" height="12" uuid="a2a37948-f937-4271-b246-738ae06dc3cd"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_DEP_DATE_IN_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="432" width="238" height="12" uuid="6fe5f912-bddc-427b-9034-3775aa2e6a61"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_DEP_DATE_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="600" width="238" height="12" forecolor="#FF6666" uuid="f4fac703-0850-41ab-875b-2d0f8d2f40de">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_EUR} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="588" width="238" height="12" forecolor="#FF6666" uuid="0f5dbd48-bcfe-4476-9134-d0f4fc52e4eb">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_USD} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_USD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="600" width="357" height="12" uuid="a6b4561a-519e-4c77-b20d-fb7d9d2583e6"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CRED_EUR} < 0
+  ? "<style isBold='true'>в т.ч. в євро</style>"
+  : "в т.ч. в євро"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="576" width="238" height="12" forecolor="#FF6666" uuid="7fb550b9-cf40-470e-aaf5-28fb70a7eacc">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_UAH} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_UAH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="576" width="357" height="12" uuid="c4938ca7-7f1f-4df6-a9df-340fc853887d"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CRED_UAH} < 0
+  ? "<style isBold='true'>в т.ч. в гривні</style>"
+  : "в т.ч. в гривні"
+)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="588" width="357" height="12" uuid="9a74d87c-58a9-49a1-a048-55f6e5cc5c5c"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CRED_USD} < 0
+  ? "<style isBold='true'>в т.ч. в доларах</style>"
+  : "в т.ч. в доларах"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="564" width="238" height="12" forecolor="#FF6666" uuid="a8c048d6-4574-438d-919e-b220193c2635">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_ALL_UAH} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_ALL_UAH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="564" width="357" height="12" uuid="9fd4c631-801a-44aa-89d2-255996265c9a"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CRED_ALL_UAH} < 0
+  ? "<style isBold='true'>Сальдо кредитів юр. осіб (грн. екв.)</style>"
+  : "Сальдо кредитів юр. осіб (грн. екв.)"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="492" width="238" height="12" uuid="f21b2156-5018-4cb8-b8e9-8e6702307591"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_OUT_RUB}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="492" width="357" height="12" uuid="768b17cb-fb97-4ba2-8a80-11cc1aec6610"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в рублях]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="552" width="357" height="12" uuid="e2b3dc4a-7503-4e3c-944a-7abae0187a37"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в рублях]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="552" width="238" height="12" uuid="27d8e684-59cd-405f-9338-6052832f2e7c"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_ACC_CRED_IN_RUB}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="612" width="357" height="12" uuid="727164c3-81dc-4ec6-9acb-d67976a2ac93"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{SALDO_CRED_RUB} < 0
+  ? "<style isBold='true'>в т.ч. в рублях</style>"
+  : "в т.ч. в рублях"
+)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="612" width="238" height="12" forecolor="#FF6666" uuid="87159e8a-67b2-4dab-972c-f438aa637f58">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_RUB} < 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="0.5" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_RUB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="672" width="238" height="12" uuid="fbbfb6d3-d4c5-4696-9fea-a97c6a666c6e"/>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_CORP_AAC_CRED_DATE_RUB}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="672" width="357" height="12" uuid="edb91a21-ae72-4c29-b454-e7d149fbf2ca"/>
+				<box leftPadding="4" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<text><![CDATA[в т.ч. в рублях]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="240" width="238" height="12" uuid="fa34c348-57d0-4bff-9fde-4f3271f74826">
+					<printWhenExpression><![CDATA[$F{SALDO_CORP_AAC_UAH} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CORP_AAC_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="348" width="238" height="12" uuid="9b9f07a6-2320-4f4c-bd61-10bb106104b7">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_ALL_UAH} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_ALL_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="360" width="238" height="12" uuid="4ed5a9f4-ede6-44bd-a37e-216a80b11c37">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_UAH} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="372" width="238" height="12" uuid="b636f968-6341-4b84-9c29-9681dd6dfb4c">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_USD} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="384" width="238" height="12" uuid="79658d52-55fc-4315-97e6-391bf09811b8">
+					<printWhenExpression><![CDATA[$F{SALDO_DEP_EUR} >=0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_DEP_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="564" width="238" height="12" uuid="268a5117-132c-411a-b8ab-3b84b2f9b76d">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_ALL_UAH} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_ALL_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="576" width="238" height="12" uuid="100976e4-eccb-4269-a211-1d7cd5aba6fc">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_UAH} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_UAH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="588" width="238" height="12" uuid="faaf55af-499e-4e8a-b162-0d78d8acc3ef">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_USD} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_USD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="600" width="238" height="12" uuid="07af1ddb-7604-4e6e-a60e-950fcde0c05a">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_EUR} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_EUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="612" width="238" height="12" uuid="dff26fc3-adf0-4d3a-b0cf-d3e6402f3937">
+					<printWhenExpression><![CDATA[$F{SALDO_CRED_RUB} >= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0" rightPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SALDO_CRED_RUB}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+</jasperReport>
